@@ -1,4 +1,5 @@
 # Rohteil Master
+import traceback
 
 # Dieses Programm dient dazu, Rohteil-Rechtecke sowie Kreise und Spannmittel zu erstellen.
 # Dazu ist es noch möglich, Esprit automatisch auszufüllen.
@@ -542,12 +543,24 @@ class BlankMakerApp:
 
     def start_bseite(self, e):
         try:
-            partheight = float(self.blength_field.value.replace(',', '.'))
-            start_mausbewegungen(partheight)
+            partheight_str = self.blength_field.value.replace(',', '.')
+            if not partheight_str:
+                self.show_dialog("Fehler", "Bitte Fertigteilhöhe für B-Seite eingeben.")
+                return
+            partheight = float(partheight_str)
+
+            # Übergebe self.page an start_mausbewegungen
+            start_mausbewegungen(self.page, partheight) # NEU: self.page übergeben
+
+            # Optional: Eine kleine Bestätigung im Hauptfenster, dass der Prozess gestartet wurde,
+            # da der eigentliche Dialog erst am Ende von start_mausbewegungen erscheint.
+            # self.show_dialog("Info", "B-Seiten Automatisierung gestartet...")
+
         except ValueError:
-            self.show_dialog("Fehler", "Ungültige Eingabe für Fertigteilhöhe")
-        except Exception as e:
-            self.show_dialog("Fehler", f"Fehler beim Starten der B-Seite: {e}")
+            self.show_dialog("Fehler", "Ungültige Eingabe für Fertigteilhöhe. Bitte eine Zahl eingeben.")
+        except Exception as ex: # Fange auch andere Fehler ab, die von start_mausbewegungen kommen könnten
+            self.show_dialog("Fehler", f"Fehler beim Starten der B-Seite: {ex}")
+            #traceback.print_exc() # Gibt den vollen Traceback in der Konsole aus
 
     def load_step_file(self, e):
         file_name = self.ctrl_v_field.value.strip()
