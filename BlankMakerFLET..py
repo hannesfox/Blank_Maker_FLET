@@ -253,9 +253,19 @@ class BlankMakerApp:
         self.page.update()
 
     def start_kombiablauf(self, e):
-        kombi = Kombiablauf(self.ctrl_v_field, self.selection_dropdown, self.destination_field,
-                            self.length_field, self.width_field, self.height_field)
-        kombi.kombiablauf()
+        # Übergebe self.page und die Flet-Steuerelemente
+        kombi = Kombiablauf(self.page, # Hinzugefügt: Die Flet Page Instanz
+                           self.ctrl_v_field,
+                           self.selection_dropdown,
+                           self.destination_field,
+                           self.length_field,
+                           self.width_field,
+                           self.height_field)
+        try:
+            kombi.kombiablauf()
+        except Exception as ex_kombi_start:
+            # Falls kombiablauf() selbst eine Exception wirft, bevor die interne Fehlerbehandlung greift
+            self.show_dialog("Fehler Kombiablauf", f"Startfehler im Kombiablauf: {ex_kombi_start}")
 
     def on_entry_change(self, e):
         if self.updating:
