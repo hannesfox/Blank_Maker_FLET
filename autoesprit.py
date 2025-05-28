@@ -101,22 +101,24 @@ def run_program(length, width, height):
 
     pyautogui.doubleClick(986, 1127, duration=wegzeit1)  # auf schatten klicken
     pyautogui.click(1756, 109, duration=wegzeit1)       #Profilkurfe erzeugen
+    time.sleep(0.5)
 
     # Bauteil treffen - statt time.sleep(5)
-    def show_message_box():
-        root = tk.Tk()
-        root.withdraw()  # Hauptfenster ausblenden
-        root.attributes("-topmost", True)
-        root.update()  # Fenster sofort anzeigen
-        root.focus_force()  # Fenster erhält den Fokus
-        messagebox.showinfo("Bauteil getroffen?", "Bitte klicken Sie auf OK, um fortzufahren.")
-        root.destroy()  # Fenster nach Bestätigung schließen
+    #def show_message_box():
+        #root = tk.Tk()
+        #root.withdraw()  # Hauptfenster ausblenden
+        #root.attributes("-topmost", True)
+        #root.update()  # Fenster sofort anzeigen
+        #root.focus_force()  # Fenster erhält den Fokus
+        #messagebox.showinfo("Bauteil getroffen?", "Bitte klicken Sie auf OK, um fortzufahren.")
+        #root.destroy()  # Fenster nach Bestätigung schließen
 
     pyautogui.doubleClick(2205, 814, duration=wegzeit1)   #mittig auf bauteil
+    time.sleep(0.5)
 
 
     # Messagebox anzeigen und auf Benutzerklick warten
-    show_message_box()
+    #show_message_box()
 
     pyautogui.click(1010, 329, duration=wegzeit1)  # OK Klicken
 

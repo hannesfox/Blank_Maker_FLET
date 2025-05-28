@@ -57,7 +57,7 @@ class BlankMakerApp:
         self.page.window_height = 1200
         self.page.window_left = 0
         self.page.window_top = 0
-        self.page.theme_mode = ft.ThemeMode.DARK
+        self.page.theme_mode = ft.ThemeMode.LIGHT
 
         current_date = datetime.datetime.now()
         kalenderwoche = int(current_date.strftime("%V"))
