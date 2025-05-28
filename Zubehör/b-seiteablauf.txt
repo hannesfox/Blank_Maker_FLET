@@ -1,0 +1,49 @@
+--masten ausblenden feature u werkzeugweg
+-alles markiren strg +A
+ 
+arbeitsebene vorne auswählen zwei klicks
+
+--ctrl+C modifizieren -
+- rotieren zwei klicks-
+- klick auf originale 
+- winkel doppelklick und 180 eintragen
+- haken prüfen mit bild und klicken 
+- klick ok--------------------------------------
+
+arbeitsebene XYZ auswählen zwei klicks--------
+
+--ansicht draufsicht
+- klick Y achse oben
+- ansicht iso-----------------------------
+
+--ctrl+C modifizieren -----------
+- verschieben zwei klicks----------
+- klick auf originale--------------
+- 4x tab 
+- höhe eintragen laut eingabe
+- enter----------------
+
+--freiklicken das nichts mehr markiert ist---------
+- masten einblenden feature u werkzeugweg-------------
+
+--feature auswählen zwei klicks------
+- strg+A
+- ctrl+C modifizieren ------------------
+- symmetrie zwei klicks
+- klick auf originale + klick Y
+- haken prüfen mit bild und klicken
+- enter ------------------------------------------------
+
+--konturzug auswählen zwei klicks
+- strg+A
+- klick bearbeitungsseite
+- zweimal pfeil nach oben------------------
+
+--freiklicken das nichts mehr markiert ist
+
+-- klick neuberechnen
+- ALLES zwei klicks
+
+
+
+ 

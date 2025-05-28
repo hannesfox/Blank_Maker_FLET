@@ -1,0 +1,67 @@
+﻿in cmd ausführen!!!!
+
+cd AppData\Local\Programs\Python\Python311\Scripts
+
+pip install pyautogui
+pip install ezdxf
+pip install pyscreeze
+pip install pysteps
+pip install ttkbootstrap
+pip install matplotlib
+
+
+
+pip install pyautogui
+pip install keyboard
+pip install cv2
+pip install pynput
+für ki bilder
+pip install scikit-image
+pip install watchdog
+pip install openpyxl
+pip install tqdm
+pip install PyMuPDF
+
+pip install labelme
+cd AppData\.............. dann   labelme
+
+#test
+pip install cadquery vtk
+pip install pandas
+pip install cadquery pillow
+pip install trimesh
+pip install unidiff
+pip install beautifulsoup4
+pip install flet[all]
+pip install pillow pytesseract pyperclip
+
+pip install xlrd
+pip install cadquery pyvista tk
+
+
+
+
+#DragAndDrop
+pip install tkinterdnd2
+
+
+
+pip install cx-Freeze
+
+
+alte rechner
+cd AppData\Local\Programs\Python\Python38\Scripts
+
+
+
+
+AppData\Local\Programs\Python\Python311\Scripts\auto-py-to-exe
+
+
+update:
+cd AppData\Local\Programs\Python\Python311\
+python.exe -m pip install --upgrade pip
+
+pip install auto-py-to-exe --upgrade
+pip install pyinstaller --upgrade
+
