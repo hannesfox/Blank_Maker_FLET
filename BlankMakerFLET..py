@@ -374,20 +374,20 @@ class BlankMakerApp:
             self.show_dialog("Fehler", f"Fehler beim Ausführen der Aktionen: {e}")
 
     def action_1(self):
-        image_position = pyscreeze.locateOnScreen('1.png', confidence=0.5)
+        image_position = pyscreeze.locateOnScreen('Bilder/1.png', confidence=0.5)
         image_center = pyscreeze.center(image_position)
         time.sleep(0.5)
         pyautogui.click(image_center)
         time.sleep(0.5)
 
     def action_2(self):
-        image_position = pyscreeze.locateOnScreen('2.png', confidence=0.4)
+        image_position = pyscreeze.locateOnScreen('Bilder/2.png', confidence=0.4)
         image_center = pyscreeze.center(image_position)
         time.sleep(0.9)
         pyautogui.click(image_center)
 
     def action_3(self):
-        image_position = pyscreeze.locateOnScreen('3.png', confidence=0.5, grayscale=True)
+        image_position = pyscreeze.locateOnScreen('Bilder/3.png', confidence=0.5, grayscale=True)
         image_center = pyscreeze.center(image_position)
         time.sleep(0.4)
         pyautogui.doubleClick(image_center)

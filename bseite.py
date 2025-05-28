@@ -56,8 +56,8 @@ def start_mausbewegungen(partheight):
         return location
 
     # Dateipfade Bilder
-    suchbild_pfad_1 = 'b1.png'
-    kontrollbild_pfad_1 = 'b2.png'
+    suchbild_pfad_1 = 'Bilder/b1.png'
+    kontrollbild_pfad_1 = 'Bilder/b2.png'
     
 
     # schleife für die Suche nach b1 und b2
@@ -194,8 +194,8 @@ def start_mausbewegungen(partheight):
         return location
 
     # pfade Bilder
-    suchbild_pfad_3 = 'b3.png'
-    kontrollbild_pfad_4 = 'b4.png'
+    suchbild_pfad_3 = 'Bilder/b3.png'
+    kontrollbild_pfad_4 = 'Bilder/b4.png'
     
 
     # schleife für die Suche nach b1 und b2
