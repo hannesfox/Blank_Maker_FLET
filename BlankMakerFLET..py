@@ -8,8 +8,8 @@ import traceback
 # Zielpfad Änderung: ändere nur hier die Ordnerpfade!
 
 # Autor: [Gschwendtner Johannes]
-# Datum: [28.01.2025]
-# Version: [7.7 - Flet Version]
+# Datum: [28.05.2025]
+# Version: [7.8 - Flet Version]
 
 import flet as ft
 from program1 import create_rectangle
@@ -59,6 +59,8 @@ class BlankMakerApp:
         self.page.window_left = 0
         self.page.window_top = 0
         self.page.theme_mode = ft.ThemeMode.LIGHT
+
+
 
         current_date = datetime.datetime.now()
         kalenderwoche = int(current_date.strftime("%V"))
