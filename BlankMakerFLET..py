@@ -54,13 +54,13 @@ class BlankMakerApp:
         super().__init__()
         self.page = page
         self.page.title = "Blank Maker Master 7.7 by Gschwendtner Johannes"
-        self.page.window_width = 720
+        self.page.window_width = 600
         self.page.window_height = 1200
-        self.page.window_left = 0
-        self.page.window_top = 0
+        print(f"Fenstergröße gesetzt auf: {self.page.window_width}x{self.page.window_height}")
+        if self.page.platform in [ft.PagePlatform.WINDOWS, ft.PagePlatform.LINUX, ft.PagePlatform.MACOS]:
+            self.page.window_left = 0
+            self.page.window_top = 0
         self.page.theme_mode = ft.ThemeMode.LIGHT
-
-
 
         current_date = datetime.datetime.now()
         kalenderwoche = int(current_date.strftime("%V"))
@@ -95,6 +95,7 @@ class BlankMakerApp:
 
         self.build_ui()
         self.check_dxf_files()
+
 
     def create_ui_elements(self):
         # Eingabefelder
