@@ -28,25 +28,27 @@ import datetime
 import asyncio
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
-import winsound
 
-# Startsound
-notes = [
-    (440, 300),  # A4
-    (554, 300),  # C#5
-    (659, 300),  # E5
-    (880, 500)  # A5
-]
+#neue pfade für mac
+if os.name == 'nt':
+    base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
+else:
+    base_path1 = "/Pfade-Mac/Spannmittel"  # Fake Pfad für Spannmittelordner
 
-for freq, dur in notes:
-    winsound.Beep(freq, dur)
+if os.name == 'nt':
+    base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
+else:
+    base_path2 = "/Pfade-Mac/NC-PGM"  # NC-PGM
 
-# Pfade zum Ändern
-base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
-base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
-base_path3 = "WKS05"  # Auswahl von WKS Ordner
-# base_path4 wird in init belegt
-base_path5 = "C:\\Users\\Gschwendtner\\Desktop\\Blank_Master_6.6\\prozess.pyw"  # Pfad für Prozessöffnen.py
+if os.name == 'nt':
+    base_path3 = "WKS05"
+else:
+    base_path3 = "/Pfade-Mac/NC-PGM/WKS05"
+
+if os.name == 'nt':
+    base_path5 = "C:\\Users\\Gschwendtner\\Desktop\\Blank_Master_6.6\\prozess.pyw"
+else:
+    base_path5 = "/prozess.pyw"
 
 
 class BlankMakerApp:
@@ -81,7 +83,10 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        if os.name == 'nt':
+            self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        else:
+            self.base_path4 = f"/Pfade-Mac/Esprit/NC-Files/AT-25-KW/1/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
 
         self.history = []  # Für Zurück-Button
         self.updating = False  # Flag zur Vermeidung von rekursiven Aufrufen
@@ -147,6 +152,16 @@ class BlankMakerApp:
         # UI Layout erstellen
         self.page.add(
             ft.Column([
+                # Programmname Sektion
+                ft.Text("Programmname:", size=12, weight=ft.FontWeight.BOLD),
+                self.ctrl_v_field,
+                self.selection_dropdown,
+
+                ft.Row([
+                    ft.ElevatedButton("Kombiablauf Starten", on_click=self.start_kombiablauf, width=200, height=50,
+                                      tooltip="Startet den Kombiablauf und zeigt mir am Ende eine Entscheidungsmeldung an.")
+                ]),
+
                 # Rohteil Maße Eingabe
                 ft.Row([
                     ft.Text("Erzeuge Rechteck", size=14, weight=ft.FontWeight.BOLD),
@@ -178,20 +193,6 @@ class BlankMakerApp:
                 ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
 
                 ft.Divider(height=20),
-
-                # Programmname Sektion
-                ft.Text("Programmname:", size=12, weight=ft.FontWeight.BOLD),
-                self.ctrl_v_field,
-                self.selection_dropdown,
-
-                ft.Row([
-                    ft.ElevatedButton("Ausfüllen 1", on_click=self.execute_actions, width=120, height=50,
-                                      tooltip="Trägt in Esprit Pgm Namen ein, wählt Spannungsarten aus, lädt Rohteil und Spannmittel."),
-                    ft.ElevatedButton("Ausfüllen 2", on_click=self.start_program,
-                                      tooltip="Füllt Rohmaße aus, wählt Fertigteil aus, definiert Spannmittel."),
-                    ft.ElevatedButton("Kombiablauf Starten", on_click=self.start_kombiablauf, width=120, height=50,
-                                      tooltip="Startet den Kombiablauf und zeigt mir am Ende eine Entscheidungsmeldung an.")
-                ]),
 
                 # B-Seite
                 ft.Row([
