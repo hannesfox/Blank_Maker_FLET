@@ -46,8 +46,8 @@ base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Span
 base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
 base_path3 = "WKS05"  # Auswahl von WKS Ordner
 # base_path4 wird in init belegt
-base_path5 = "C:\\Users\\Gschwendtner\\Desktop\\Blank_Master_6.6\\prozess.pyw"  # Pfad für Prozessöffnen.py
-
+#base_path5 = "C:\\Users\\Gschwendtner\\Desktop\\Blank_Master_6.6\\prozess.pyw"  # Pfad für Prozessöffnen.py
+base_path5 = "C:\\Users\\Gschwendtner\\PycharmProjects\\Blank_Maker_FLET\\prozess.pyw"
 
 class BlankMakerApp:
     def __init__(self, page: ft.Page):
@@ -135,6 +135,8 @@ class BlankMakerApp:
         self.status_label = ft.Text("", size=12, color=ft.Colors.GREEN)
         self.status_label1 = ft.Text("", size=12, color=ft.Colors.BLUE)
         self.original_size_label = ft.Text("", size=8)
+
+
 
     def build_ui(self):
         # UI Layout erstellen
@@ -267,12 +269,25 @@ class BlankMakerApp:
 
                 ft.Divider(height=20),
 
-                # Prozess Buttons - Fixed deprecated color usage
+                # Prozess Buttons - Fixed deprecated color usage #############################################
                 ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
                 ft.Row([
-                    ft.ElevatedButton("Prozess Start", on_click=self.run_python_script, bgcolor=ft.Colors.LIGHT_GREEN),
-                    ft.ElevatedButton("Prozess Stop", on_click=self.kill_python_script)
+                    ft.ElevatedButton(
+                        "Prozess Start",
+                        on_click=self.run_python_script,
+                        bgcolor=ft.Colors.GREEN,
+                        color=ft.Colors.WHITE,
+                        disabled=self.script_process is not None
+                    ),
+                    ft.ElevatedButton(
+                        "Prozess Stop",
+                        on_click=self.kill_python_script,
+                        bgcolor=ft.Colors.RED,
+                        color=ft.Colors.WHITE,
+                        disabled=self.script_process is None
+                    )
                 ]),
+                ##############################################################################################
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
@@ -572,6 +587,7 @@ class BlankMakerApp:
                                                    stderr=subprocess.PIPE,
                                                    stdin=subprocess.PIPE,
                                                    creationflags=subprocess.CREATE_NO_WINDOW)
+            self.update()
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Skripts: {e}")
 
@@ -579,6 +595,7 @@ class BlankMakerApp:
         if self.script_process is not None:
             self.script_process.kill()
             self.script_process = None
+            self.update()
 
     def start_bseite(self, e):
         try:
