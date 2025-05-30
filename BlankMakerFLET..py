@@ -53,14 +53,7 @@ class BlankMakerApp:
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
-        self.page.title = "Blank Maker Master 7.7 by Gschwendtner Johannes"
-        self.page.window_width = 600
-        self.page.window_height = 1200
-        print(f"Fenstergröße gesetzt auf: {self.page.window_width}x{self.page.window_height}")
-        if self.page.platform in [ft.PagePlatform.WINDOWS, ft.PagePlatform.LINUX, ft.PagePlatform.MACOS]:
-            self.page.window_left = 0
-            self.page.window_top = 0
-        self.page.theme_mode = ft.ThemeMode.LIGHT
+
 
         current_date = datetime.datetime.now()
         kalenderwoche = int(current_date.strftime("%V"))
@@ -99,15 +92,15 @@ class BlankMakerApp:
 
     def create_ui_elements(self):
         # Eingabefelder
-        self.length_field = ft.TextField(label="Länge:", width=150, on_change=self.update_folder_selection)
-        self.width_field = ft.TextField(label="Breite:", width=150, on_change=self.on_width_change)
-        self.height_field = ft.TextField(label="Höhe:", width=150)
+        self.length_field = ft.TextField(label="X Länge:", width=150, on_change=self.update_folder_selection)
+        self.width_field = ft.TextField(label="Y Breite:", width=150, on_change=self.on_width_change)
+        self.height_field = ft.TextField(label="Z Höhe:", width=150)
         self.diameter_field = ft.TextField(label="Durchmesser:", width=150)
         self.height2_field = ft.TextField(label="Höhe:", width=150)
-        self.value_field = ft.TextField(label="Wert in mm:", width=150)
+        self.value_field = ft.TextField(label="Wert in mm:", width=300)
         self.ctrl_v_field = ft.TextField(label="Text für CTRL+V eingeben:", width=300)
         self.at_prefix_field = ft.TextField(label="AT-..", value="25", width=100)
-        self.project_name_field = ft.TextField(label="Projektname:", width=200, max_length=4,
+        self.project_name_field = ft.TextField(label="Projektname: zB.0815", width=200, max_length=4,
                                                on_change=self.on_entry_change)
         self.destination_field = ft.TextField(label="Zielordner:", width=500, value=self.base_path4)
         self.blength_field = ft.TextField(label="Fertigteilhöhe:", width=150)
@@ -122,8 +115,8 @@ class BlankMakerApp:
         )
 
         self.selection_dropdown = ft.Dropdown(
-            label="Programmname:",
-            width=200,
+            label="Maschienenart:",
+            width=300,
             value="Option",
             options=[
                 ft.dropdown.Option('5 Achs  3 Achs'),
@@ -147,12 +140,19 @@ class BlankMakerApp:
         # UI Layout erstellen
         self.page.add(
             ft.Column([
+                # Programmname Sektion
+                ft.Text("Programmname:", size=14, weight=ft.FontWeight.BOLD),
+                self.ctrl_v_field,
+                self.selection_dropdown,
+
+                ft.Divider(height=20),
+
                 # Rohteil Maße Eingabe
                 ft.Row([
                     ft.Text("Erzeuge Rechteck", size=14, weight=ft.FontWeight.BOLD),
-                    self.maße_field,
-                    ft.ElevatedButton("STEP Analyse", on_click=self.load_step_file,
-                                      tooltip="Sucht nach Eingabe von Programmnamen die STEP-Datei und berechnet Fertigteilgröße und Rohteilgröße.")
+                    #self.maße_field,
+                    #ft.ElevatedButton("STEP Analyse", on_click=self.load_step_file,
+                                      #tooltip="Sucht nach Eingabe von Programmnamen die STEP-Datei und berechnet Fertigteilgröße und Rohteilgröße.")
                 ]),
 
                 # Rechteck Eingabefelder
@@ -160,38 +160,46 @@ class BlankMakerApp:
                 ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
                 self.original_size_label,
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Kreis Sektion
                 ft.Text("Erzeuge Kreis", size=14, weight=ft.FontWeight.BOLD),
                 ft.Row([self.diameter_field, self.height2_field]),
                 ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Spannmittel Sektion
-                ft.Text("Spannmittel Auswahl:", size=12, weight=ft.FontWeight.BOLD),
+                ft.Text("Spannmittel Auswahl:", size=14, weight=ft.FontWeight.BOLD),
                 self.value_field,
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
                 ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
 
+
+                # Button Kombiablauf mit Play-Icon
+                ft.Container(
+                    content=ft.ElevatedButton(
+                        text="Kombiablauf Starten",
+                        icon=ft.Icons.PLAY_CIRCLE_FILL,  # aktualisierte Enum-Variante
+                        on_click=self.start_kombiablauf,
+                        width=300,
+                        height=40,
+                        style=ft.ButtonStyle(
+                            bgcolor="#ADD8E6",  # Pastellgrün
+                            color=ft.Colors.BLACK,
+                            shape=ft.RoundedRectangleBorder(radius=5),
+                            padding=10,
+                            elevation=5
+                        ),
+                        tooltip="Auto Ausfüllen, Laden der DXF u. Schraubstockes, Pause:-) , Rohteil Definierung und Erstellung."
+                    ),
+                    alignment=ft.alignment.center,
+                    padding=ft.padding.symmetric(vertical=10)
+                ),
+
                 ft.Divider(height=20),
-
-                # Programmname Sektion
-                ft.Text("Programmname:", size=12, weight=ft.FontWeight.BOLD),
-                self.ctrl_v_field,
-                self.selection_dropdown,
-
-                ft.Row([
-                    ft.ElevatedButton("Ausfüllen 1", on_click=self.execute_actions, width=120, height=50,
-                                      tooltip="Trägt in Esprit Pgm Namen ein, wählt Spannungsarten aus, lädt Rohteil und Spannmittel."),
-                    ft.ElevatedButton("Ausfüllen 2", on_click=self.start_program,
-                                      tooltip="Füllt Rohmaße aus, wählt Fertigteil aus, definiert Spannmittel."),
-                    ft.ElevatedButton("Kombiablauf Starten", on_click=self.start_kombiablauf, width=120, height=50,
-                                      tooltip="Startet den Kombiablauf und zeigt mir am Ende eine Entscheidungsmeldung an.")
-                ]),
 
                 # B-Seite
                 ft.Row([
@@ -212,17 +220,26 @@ class BlankMakerApp:
                     self.back_button
                 ]),
 
-                # Haupt-Button - Fixed deprecated color usage
-                ft.FilledButton(
-                    "PROGRAMM",
-                    on_click=self.move_files,
-                    style=ft.ButtonStyle(
-                        color=ft.Colors.WHITE,
-                        bgcolor=ft.Colors.RED,
-                        text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
+                # Button Programm Ausgeben mit Play-Icon in Rot
+                ft.Container(
+                    content=ft.ElevatedButton(
+                        text="PROGRAMM AUSGEBEN",
+                        icon=ft.Icons.SAVE,
+                        on_click=self.move_files,
+                        width=300,
+                        height=40,
+                        style=ft.ButtonStyle(
+                            bgcolor=ft.Colors.RED,  # kräftiges Rot
+                            color=ft.Colors.WHITE,  # weiße Schrift
+                            shape=ft.RoundedRectangleBorder(radius=5),
+                            padding=10,
+                            elevation=5,
+                            text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
+                        ),
+                        tooltip="Gibt das fertige Programm aus und kopiert die Daten in die Ablage."
                     ),
-                    height=60,
-                    width=200
+                    alignment=ft.alignment.center,
+                    padding=ft.padding.symmetric(vertical=20)
                 ),
 
                 ft.Divider(height=20),
@@ -238,9 +255,9 @@ class BlankMakerApp:
                 self.status_label,
                 self.status_label1
             ],
-                scroll=ft.ScrollMode.AUTO,
-                spacing=10,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scrollverhalten
+                expand=True,  # Column soll verfügbaren Platz ausfüllen
+            )
         )
 
     # Event Handler Funktionen
@@ -673,6 +690,21 @@ class BlankMakerApp:
 
 
 def main(page: ft.Page):
+    # Fensterkonfiguration
+    page.title = "BMM 9.FLET by Gschwendtner Johannes"
+
+    # KORREKTUR: Verwende page.window statt direkter Attribute
+    page.window.width = 600
+    page.window.height = 1400
+    page.window.resizable = True
+    page.window.maximizable = True
+    page.window.left = 0
+    page.window.top = 0
+
+    # Zentrierung
+    #page.window.center()
+
+    page.theme_mode = ft.ThemeMode.LIGHT
     app = BlankMakerApp(page)
 
 
