@@ -1,5 +1,5 @@
 # Rohteil Master
-import traceback
+
 
 # Dieses Programm dient dazu, Rohteil-Rechtecke sowie Kreise und Spannmittel zu erstellen.
 # Dazu ist es noch möglich, Esprit automatisch auszufüllen.
@@ -8,8 +8,8 @@ import traceback
 # Zielpfad Änderung: ändere nur hier die Ordnerpfade!
 
 # Autor: [Gschwendtner Johannes]
-# Datum: [28.05.2025]
-# Version: [7.8 - Flet Version]
+# Datum: [30.05.2025]
+# Version: [9.0 - Flet Version]
 
 import flet as ft
 from program1 import create_rectangle
@@ -28,25 +28,12 @@ import datetime
 import asyncio
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
-import winsound
-
-# Startsound
-notes = [
-    (440, 300),  # A4
-    (554, 300),  # C#5
-    (659, 300),  # E5
-    (880, 500)  # A5
-]
-
-for freq, dur in notes:
-    winsound.Beep(freq, dur)
 
 # Pfade zum Ändern
 base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
 base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
 base_path3 = "WKS05"  # Auswahl von WKS Ordner
 # base_path4 wird in init belegt
-#base_path5 = "C:\\Users\\Gschwendtner\\Desktop\\Blank_Master_6.6\\prozess.pyw"  # Pfad für Prozessöffnen.py
 base_path5 = "C:\\Users\\Gschwendtner\\PycharmProjects\\Blank_Maker_FLET\\prozess.pyw"
 
 class BlankMakerApp:
@@ -136,7 +123,7 @@ class BlankMakerApp:
         self.status_label1 = ft.Text("", size=12, color=ft.Colors.BLUE)
         self.original_size_label = ft.Text("", size=8)
 
-        # In __init__ oder build Methode - Buttons als Instanzvariablen erstellen:
+        # Prozess Öffnen button
         self.start_button = ft.ElevatedButton(
             "Prozess Start",
             on_click=self.run_python_script,
@@ -156,7 +143,7 @@ class BlankMakerApp:
         self.status_icon = ft.Icon(
             ft.Icons.CIRCLE,
             color=ft.Colors.RED,
-            size=16
+            size=25
         )
 
         self.status_text = ft.Text(
@@ -211,7 +198,7 @@ class BlankMakerApp:
                 ft.Container(
                     content=ft.ElevatedButton(
                         text="Kombiablauf Starten",
-                        icon=ft.Icons.PLAY_CIRCLE_FILL,  # aktualisierte Enum-Variante
+                        icon=ft.Icons.PLAY_CIRCLE_FILL,  # icon
                         on_click=self.start_kombiablauf,
                         width=300,
                         height=40,
@@ -296,14 +283,13 @@ class BlankMakerApp:
 
                 ft.Divider(height=20),
 
-                # Prozess Buttons - Fixed deprecated color usage #############################################
+                # Prozess Buttons - grün rot
                 ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
                 ft.Row([self.start_button, self.stop_button]),
                 ft.Container(
                     content=ft.Row([self.status_icon, self.status_text]),
                     margin=ft.margin.only(top=5)
                 ),
-                ##############################################################################################
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
@@ -595,7 +581,7 @@ class BlankMakerApp:
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Programms: {e}")
 
-    # Dann in den Funktionen die Buttons aktualisieren:##############################################
+    # prozess.pyw starten und killen
     def run_python_script(self, e):
         try:
             script_path = base_path5
@@ -688,8 +674,8 @@ class BlankMakerApp:
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
 
-                #################################################################################
 
+    #B Seitenautomatisierung
     def start_bseite(self, e):
         try:
             partheight_str = self.blength_field.value.replace(',', '.')
