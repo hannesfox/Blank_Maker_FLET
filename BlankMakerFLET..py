@@ -136,7 +136,34 @@ class BlankMakerApp:
         self.status_label1 = ft.Text("", size=12, color=ft.Colors.BLUE)
         self.original_size_label = ft.Text("", size=8)
 
+        # In __init__ oder build Methode - Buttons als Instanzvariablen erstellen:
+        self.start_button = ft.ElevatedButton(
+            "Prozess Start",
+            on_click=self.run_python_script,
+            bgcolor=ft.Colors.GREEN,
+            color=ft.Colors.WHITE,
+            disabled=False
+        )
 
+        self.stop_button = ft.ElevatedButton(
+            "Prozess Stop",
+            on_click=self.kill_python_script,
+            bgcolor=ft.Colors.RED,
+            color=ft.Colors.WHITE,
+            disabled=True
+        )
+
+        self.status_icon = ft.Icon(
+            ft.Icons.CIRCLE,
+            color=ft.Colors.RED,
+            size=16
+        )
+
+        self.status_text = ft.Text(
+            "Gestoppt",
+            size=12,
+            color=ft.Colors.RED
+        )
 
     def build_ui(self):
         # UI Layout erstellen
@@ -271,22 +298,11 @@ class BlankMakerApp:
 
                 # Prozess Buttons - Fixed deprecated color usage #############################################
                 ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row([
-                    ft.ElevatedButton(
-                        "Prozess Start",
-                        on_click=self.run_python_script,
-                        bgcolor=ft.Colors.GREEN,
-                        color=ft.Colors.WHITE,
-                        disabled=self.script_process is not None
-                    ),
-                    ft.ElevatedButton(
-                        "Prozess Stop",
-                        on_click=self.kill_python_script,
-                        bgcolor=ft.Colors.RED,
-                        color=ft.Colors.WHITE,
-                        disabled=self.script_process is None
-                    )
-                ]),
+                ft.Row([self.start_button, self.stop_button]),
+                ft.Container(
+                    content=ft.Row([self.status_icon, self.status_text]),
+                    margin=ft.margin.only(top=5)
+                ),
                 ##############################################################################################
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
@@ -579,23 +595,100 @@ class BlankMakerApp:
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Programms: {e}")
 
+    # Dann in den Funktionen die Buttons aktualisieren:##############################################
     def run_python_script(self, e):
         try:
             script_path = base_path5
-            self.script_process = subprocess.Popen(["python", script_path],
-                                                   stdout=subprocess.PIPE,
-                                                   stderr=subprocess.PIPE,
-                                                   stdin=subprocess.PIPE,
-                                                   creationflags=subprocess.CREATE_NO_WINDOW)
-            self.update()
+
+            # Prüfe ob bereits ein Prozess läuft
+            if self.script_process is not None and self.script_process.poll() is None:
+                self.show_dialog("Info", "Prozess läuft bereits!")
+                return
+
+            # Starte neuen Prozess
+            self.script_process = subprocess.Popen(
+                ["python", script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+
+            # UI aktualisieren
+            self.start_button.disabled = True
+            self.stop_button.disabled = False
+            self.status_icon.color = ft.Colors.GREEN
+            self.status_text.value = "Läuft"
+            self.status_text.color = ft.Colors.GREEN
+            self.page.update()
+
+            # Optional: Status-Überwachung in separatem Thread
+            self.page.run_task(self.monitor_process)
+
+        except FileNotFoundError:
+            self.show_dialog("Fehler", f"Skript nicht gefunden: {base_path5}")
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Skripts: {e}")
 
     def kill_python_script(self, e):
-        if self.script_process is not None:
-            self.script_process.kill()
+        if self.script_process is None:
+            self.show_dialog("Info", "Kein Prozess läuft!")
+            return
+
+        try:
+            # Prüfe ob Prozess noch läuft
+            if self.script_process.poll() is not None:
+                self.show_dialog("Info", "Prozess ist bereits beendet!")
+                self.reset_ui_to_stopped()
+                return
+
+            # Versuche graceful shutdown
+            self.script_process.terminate()
+
+            # Warte auf Beendigung (max 3 Sekunden)
+            try:
+                self.script_process.wait(timeout=3)
+                print("Prozess erfolgreich beendet")
+            except subprocess.TimeoutExpired:
+                # Force kill falls terminate() nicht funktioniert
+                print("Prozess antwortet nicht, force kill...")
+                self.script_process.kill()
+                self.script_process.wait(timeout=2)
+
+        except Exception as ex:
+            print(f"Fehler beim Beenden: {ex}")
+            # Als letzter Ausweg - OS-Level kill
+            try:
+                import os, signal
+                if hasattr(self.script_process, 'pid'):
+                    os.kill(self.script_process.pid, signal.SIGTERM)
+            except:
+                pass
+        finally:
             self.script_process = None
-            self.update()
+            self.reset_ui_to_stopped()
+
+    def reset_ui_to_stopped(self):
+        """Setzt die UI auf 'gestoppt' zurück"""
+        self.start_button.disabled = False
+        self.stop_button.disabled = True
+        self.status_icon.color = ft.Colors.RED
+        self.status_text.value = "Gestoppt"
+        self.status_text.color = ft.Colors.RED
+        self.page.update()
+
+    async def monitor_process(self):
+        """Überwacht den Prozess-Status"""
+        while self.script_process is not None:
+            if self.script_process.poll() is not None:
+                # Prozess ist beendet
+                print("Prozess wurde beendet")
+                self.script_process = None
+                self.reset_ui_to_stopped()
+                break
+            await asyncio.sleep(1)  # Prüfe jede Sekunde
+
+                #################################################################################
 
     def start_bseite(self, e):
         try:
