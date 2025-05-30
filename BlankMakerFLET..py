@@ -35,6 +35,8 @@ base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
 base_path3 = "WKS05"  # Auswahl von WKS Ordner
 # base_path4 wird in init belegt
 base_path5 = "C:\\Users\\Gschwendtner\\PycharmProjects\\Blank_Maker_FLET\\prozess.pyw"
+# pfad für flet CRC App
+PATH_TO_EXTERNAL_FLET_APP = r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py"
 
 class BlankMakerApp:
     def __init__(self, page: ft.Page):
@@ -67,6 +69,7 @@ class BlankMakerApp:
         self.updating = False  # Flag zur Vermeidung von rekursiven Aufrufen
         self.current_value = ""
         self.script_process = None
+        self.external_flet_process = None  # NEU: Für die externe Flet App
 
         # UI-Elemente erstellen
         self.create_ui_elements()
@@ -151,6 +154,28 @@ class BlankMakerApp:
             size=12,
             color=ft.Colors.RED
         )
+
+        #################################################################################################
+        # NEU: Buttons und Status für die externe Flet-Anwendung
+        self.start_external_flet_button = ft.ElevatedButton(
+            "Externe Flet App STARTEN",
+            on_click=self.start_external_flet_app,
+            bgcolor=ft.Colors.BLUE_ACCENT_700,
+            color=ft.Colors.WHITE,
+        )
+        self.stop_external_flet_button = ft.ElevatedButton(
+            "Externe Flet App STOPPEN",
+            on_click=self.stop_external_flet_app,
+            bgcolor=ft.Colors.ORANGE_ACCENT_700,
+            color=ft.Colors.WHITE,
+            disabled=True  # Am Anfang ist nichts zu stoppen
+        )
+        self.external_flet_status_text = ft.Text(
+            "Externe Flet App: Gestoppt",
+            size=12,
+            color=ft.Colors.GREY
+        )
+        ####################################################################################################
 
     def build_ui(self):
         # UI Layout erstellen
@@ -290,6 +315,17 @@ class BlankMakerApp:
                     content=ft.Row([self.status_icon, self.status_text]),
                     margin=ft.margin.only(top=5)
                 ),
+                ###########################################################################################
+                ft.Divider(height=20),  # Trennlinie
+
+                # NEU: UI für externe Flet-Anwendung
+                ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
+                ft.Row([
+                    self.start_external_flet_button,
+                    self.stop_external_flet_button
+                ]),
+                self.external_flet_status_text,
+                ############################################################################################
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
@@ -674,6 +710,86 @@ class BlankMakerApp:
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
 
+    #######################################################################################################
+    # NEU: Methoden zum Starten und Stoppen der externen Flet-Anwendung
+    def start_external_flet_app(self, e):
+        try:
+            if not os.path.exists(PATH_TO_EXTERNAL_FLET_APP):
+                self.show_dialog("Fehler", f"Externe Flet App nicht gefunden unter: {PATH_TO_EXTERNAL_FLET_APP}")
+                return
+
+            if self.external_flet_process is not None and self.external_flet_process.poll() is None:
+                self.show_dialog("Info", "Externe Flet App läuft bereits!")
+                return
+
+            # Starte die externe Flet-App.
+            # 'python' oder 'pythonw'. 'pythonw' versteckt das Konsolenfenster unter Windows.
+            # Für Flet-Apps ist das Konsolenfenster oft nicht nötig, da sie ihre eigene GUI haben.
+            # creationflags ist nützlich unter Windows, um das cmd-Fenster zu unterdrücken.
+            self.external_flet_process = subprocess.Popen(
+                ["python", PATH_TO_EXTERNAL_FLET_APP],  # oder "pythonw"
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+            )
+
+            self.start_external_flet_button.disabled = True
+            self.stop_external_flet_button.disabled = False
+            self.external_flet_status_text.value = "Externe Flet App: Läuft"
+            self.external_flet_status_text.color = ft.Colors.GREEN_ACCENT_700
+            self.page.update()
+            self.page.run_task(self.monitor_external_flet_process)  # Eigene Monitor-Funktion
+
+        except Exception as ex:
+            self.show_dialog("Fehler", f"Fehler beim Starten der externen Flet App: {ex}")
+            self.external_flet_status_text.value = f"Externe Flet App: Startfehler"
+            self.external_flet_status_text.color = ft.Colors.RED
+            self.start_external_flet_button.disabled = False  # Start wieder erlauben
+            self.stop_external_flet_button.disabled = True
+            self.page.update()
+
+    def stop_external_flet_app(self, e):
+        if self.external_flet_process is None or self.external_flet_process.poll() is not None:
+            self.show_dialog("Info", "Externe Flet App läuft nicht oder wurde bereits beendet.")
+            self.reset_external_flet_ui_to_stopped()
+            return
+
+        try:
+            self.external_flet_process.terminate()  # Sendet SIGTERM (freundliche Anfrage zum Beenden)
+            try:
+                # Warte kurz, ob der Prozess von selbst terminiert
+                self.external_flet_process.wait(timeout=10)  # 5 Sekunden Timeout
+                print("Externe Flet App erfolgreich via terminate() beendet.")
+            except subprocess.TimeoutExpired:
+                # Wenn terminate() nicht reicht, erzwinge das Beenden
+                print("Externe Flet App reagiert nicht auf terminate(), versuche kill()...")
+                self.external_flet_process.kill()  # Sendet SIGKILL (sofortiges Beenden)
+                self.external_flet_process.wait(timeout=2)  # Kurz warten auf kill
+                print("Externe Flet App via kill() beendet.")
+        except Exception as ex:
+            self.show_dialog("Fehler", f"Problem beim Beenden der externen Flet App: {ex}")
+            # Versuche, den Prozess im Fehlerfall trotzdem als beendet zu markieren
+            print(f"Fehler beim Stoppen der externen Flet App: {ex}")
+        finally:
+            self.external_flet_process = None
+            self.reset_external_flet_ui_to_stopped()
+
+    def reset_external_flet_ui_to_stopped(self):
+        self.start_external_flet_button.disabled = False
+        self.stop_external_flet_button.disabled = True
+        self.external_flet_status_text.value = "Externe Flet App: Gestoppt"
+        self.external_flet_status_text.color = ft.Colors.GREY
+        self.page.update()
+
+    async def monitor_external_flet_process(self):
+        """Überwacht den externen Flet-Prozess-Status"""
+        while self.external_flet_process is not None:
+            if self.external_flet_process.poll() is not None:
+                # Prozess ist beendet (entweder durch unseren Stop-Button oder manuell vom User)
+                print("Externe Flet App wurde beendet.")
+                self.external_flet_process = None  # Wichtig, um den Zustand zu aktualisieren
+                self.reset_external_flet_ui_to_stopped()
+                break
+            await asyncio.sleep(1)  # Prüfe jede Sekunde
+                ###################################################################################################
 
     #B Seitenautomatisierung
     def start_bseite(self, e):
