@@ -209,16 +209,39 @@ class BlankMakerApp:
 
                 ft.Divider(height=20),
 
-                # Python Commander Sektion
-                ft.Text("PythonCommander:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row([
-                    self.at_prefix_field,
-                    ft.ElevatedButton("switch reloaded", on_click=self.toggle_value)
-                ]),
-                ft.Row([
-                    self.project_name_field,
-                    self.back_button
-                ]),
+                #Python Commander aufgeteilt auf links und rechts
+                ft.Row(
+                    controls=[
+                        # Linke Spalte: Python Commander
+                        ft.Column(
+                            controls=[
+                                ft.Text("PythonCommander:", size=12, weight=ft.FontWeight.BOLD),
+                                ft.Row([
+                                    self.at_prefix_field,
+                                    ft.ElevatedButton("switch reloaded", on_click=self.toggle_value)
+                                ]),
+                                ft.Row([
+                                    self.project_name_field,
+                                    self.back_button
+                                ]),
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                            expand=True
+                        ),
+
+                        # Rechte Spalte: Status Labels
+                        ft.Column(
+                            controls=[
+                                self.status_label,
+                                self.status_label1
+                            ],
+                            alignment=ft.MainAxisAlignment.END,
+                            horizontal_alignment=ft.CrossAxisAlignment.END,
+                            expand=True
+                        )
+                    ]
+                ),
+
 
                 # Button Programm Ausgeben mit Play-Icon in Rot
                 ft.Container(
@@ -250,12 +273,8 @@ class BlankMakerApp:
                     ft.ElevatedButton("Prozess Start", on_click=self.run_python_script, bgcolor=ft.Colors.LIGHT_GREEN),
                     ft.ElevatedButton("Prozess Stop", on_click=self.kill_python_script)
                 ]),
-
-                # Status Labels
-                self.status_label,
-                self.status_label1
             ],
-                scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scrollverhalten
+                scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
             )
         )
