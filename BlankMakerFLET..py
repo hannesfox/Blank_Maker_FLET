@@ -50,7 +50,7 @@ if os.name == 'nt':
 else:
     base_path5 = "/prozess.pyw"
 
-PATH_TO_EXTERNAL_FLET_APP = r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py"
+PATH_TO_EXTERNAL_FLET_APP = "/Users/hannes/Desktop/ProzessORC/Flet-ProzessOCR-1.0.py"
 
 
 class BlankMakerApp:
