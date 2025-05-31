@@ -176,20 +176,20 @@ class BlankMakerApp:
         #################################################################################################
         # NEU: Buttons und Status für die externe Flet-Anwendung
         self.start_external_flet_button = ft.ElevatedButton(
-            "Externe Flet App STARTEN",
+            "ORC App STARTEN",
             on_click=self.start_external_flet_app,
-            bgcolor=ft.Colors.BLUE_ACCENT_700,
+            bgcolor=ft.Colors.GREEN_ACCENT_700,
             color=ft.Colors.WHITE,
         )
         self.stop_external_flet_button = ft.ElevatedButton(
-            "Externe Flet App STOPPEN",
+            "ORC App STOPPEN",
             on_click=self.stop_external_flet_app,
-            bgcolor=ft.Colors.ORANGE_ACCENT_700,
+            bgcolor=ft.Colors.RED_ACCENT_700,
             color=ft.Colors.WHITE,
             disabled=True  # Am Anfang ist nichts zu stoppen
         )
         self.external_flet_status_text = ft.Text(
-            "Externe Flet App: Gestoppt",
+            "ORC App: Gestoppt",
             size=12,
             color=ft.Colors.GREY
         )
@@ -337,7 +337,7 @@ class BlankMakerApp:
                 ft.Divider(height=20),  # Trennlinie
 
                 # NEU: UI für externe Flet-Anwendung
-                ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
+                ft.Text("Externe Flet App (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
                 ft.Row([
                     self.start_external_flet_button,
                     self.stop_external_flet_button
