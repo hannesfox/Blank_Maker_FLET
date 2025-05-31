@@ -1,5 +1,5 @@
 # Rohteil Master
-import traceback
+
 
 # Dieses Programm dient dazu, Rohteil-Rechtecke sowie Kreise und Spannmittel zu erstellen.
 # Dazu ist es noch möglich, Esprit automatisch auszufüllen.
@@ -8,8 +8,8 @@ import traceback
 # Zielpfad Änderung: ändere nur hier die Ordnerpfade!
 
 # Autor: [Gschwendtner Johannes]
-# Datum: [28.05.2025]
-# Version: [7.8 - Flet Version]
+# Datum: [30.05.2025]
+# Version: [9.0 - Flet Version]
 
 import flet as ft
 from program1 import create_rectangle
@@ -50,19 +50,14 @@ if os.name == 'nt':
 else:
     base_path5 = "/prozess.pyw"
 
+PATH_TO_EXTERNAL_FLET_APP = r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py"
+
 
 class BlankMakerApp:
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
-        self.page.title = "Blank Maker Master 7.7 by Gschwendtner Johannes"
-        self.page.window_width = 600
-        self.page.window_height = 1200
-        print(f"Fenstergröße gesetzt auf: {self.page.window_width}x{self.page.window_height}")
-        if self.page.platform in [ft.PagePlatform.WINDOWS, ft.PagePlatform.LINUX, ft.PagePlatform.MACOS]:
-            self.page.window_left = 0
-            self.page.window_top = 0
-        self.page.theme_mode = ft.ThemeMode.LIGHT
+
 
         current_date = datetime.datetime.now()
         kalenderwoche = int(current_date.strftime("%V"))
@@ -92,6 +87,7 @@ class BlankMakerApp:
         self.updating = False  # Flag zur Vermeidung von rekursiven Aufrufen
         self.current_value = ""
         self.script_process = None
+        self.external_flet_process = None  # NEU: Für die externe Flet App
 
         # UI-Elemente erstellen
         self.create_ui_elements()
@@ -104,15 +100,15 @@ class BlankMakerApp:
 
     def create_ui_elements(self):
         # Eingabefelder
-        self.length_field = ft.TextField(label="Länge:", width=150, on_change=self.update_folder_selection)
-        self.width_field = ft.TextField(label="Breite:", width=150, on_change=self.on_width_change)
-        self.height_field = ft.TextField(label="Höhe:", width=150)
+        self.length_field = ft.TextField(label="X Länge:", width=150, on_change=self.update_folder_selection)
+        self.width_field = ft.TextField(label="Y Breite:", width=150, on_change=self.on_width_change)
+        self.height_field = ft.TextField(label="Z Höhe:", width=150)
         self.diameter_field = ft.TextField(label="Durchmesser:", width=150)
         self.height2_field = ft.TextField(label="Höhe:", width=150)
-        self.value_field = ft.TextField(label="Wert in mm:", width=150)
+        self.value_field = ft.TextField(label="Wert in mm:", width=300)
         self.ctrl_v_field = ft.TextField(label="Text für CTRL+V eingeben:", width=300)
         self.at_prefix_field = ft.TextField(label="AT-..", value="25", width=100)
-        self.project_name_field = ft.TextField(label="Projektname:", width=200, max_length=4,
+        self.project_name_field = ft.TextField(label="Projektname: zB.0815", width=200, max_length=4,
                                                on_change=self.on_entry_change)
         self.destination_field = ft.TextField(label="Zielordner:", width=500, value=self.base_path4)
         self.blength_field = ft.TextField(label="Fertigteilhöhe:", width=150)
@@ -127,8 +123,8 @@ class BlankMakerApp:
         )
 
         self.selection_dropdown = ft.Dropdown(
-            label="Programmname:",
-            width=200,
+            label="Maschienenart:",
+            width=300,
             value="Option",
             options=[
                 ft.dropdown.Option('5 Achs  3 Achs'),
@@ -148,26 +144,74 @@ class BlankMakerApp:
         self.status_label1 = ft.Text("", size=12, color=ft.Colors.BLUE)
         self.original_size_label = ft.Text("", size=8)
 
+        # Prozess Öffnen button
+        self.start_button = ft.ElevatedButton(
+            "Prozess Start",
+            on_click=self.run_python_script,
+            bgcolor=ft.Colors.GREEN,
+            color=ft.Colors.WHITE,
+            disabled=False
+        )
+
+        self.stop_button = ft.ElevatedButton(
+            "Prozess Stop",
+            on_click=self.kill_python_script,
+            bgcolor=ft.Colors.RED,
+            color=ft.Colors.WHITE,
+            disabled=True
+        )
+
+        self.status_icon = ft.Icon(
+            ft.Icons.CIRCLE,
+            color=ft.Colors.RED,
+            size=25
+        )
+
+        self.status_text = ft.Text(
+            "Gestoppt",
+            size=12,
+            color=ft.Colors.RED
+        )
+
+        #################################################################################################
+        # NEU: Buttons und Status für die externe Flet-Anwendung
+        self.start_external_flet_button = ft.ElevatedButton(
+            "Externe Flet App STARTEN",
+            on_click=self.start_external_flet_app,
+            bgcolor=ft.Colors.BLUE_ACCENT_700,
+            color=ft.Colors.WHITE,
+        )
+        self.stop_external_flet_button = ft.ElevatedButton(
+            "Externe Flet App STOPPEN",
+            on_click=self.stop_external_flet_app,
+            bgcolor=ft.Colors.ORANGE_ACCENT_700,
+            color=ft.Colors.WHITE,
+            disabled=True  # Am Anfang ist nichts zu stoppen
+        )
+        self.external_flet_status_text = ft.Text(
+            "Externe Flet App: Gestoppt",
+            size=12,
+            color=ft.Colors.GREY
+        )
+        ####################################################################################################
+
     def build_ui(self):
         # UI Layout erstellen
         self.page.add(
             ft.Column([
                 # Programmname Sektion
-                ft.Text("Programmname:", size=12, weight=ft.FontWeight.BOLD),
+                ft.Text("Programmname:", size=14, weight=ft.FontWeight.BOLD),
                 self.ctrl_v_field,
                 self.selection_dropdown,
 
-                ft.Row([
-                    ft.ElevatedButton("Kombiablauf Starten", on_click=self.start_kombiablauf, width=200, height=50,
-                                      tooltip="Startet den Kombiablauf und zeigt mir am Ende eine Entscheidungsmeldung an.")
-                ]),
+                ft.Divider(height=20),
 
                 # Rohteil Maße Eingabe
                 ft.Row([
                     ft.Text("Erzeuge Rechteck", size=14, weight=ft.FontWeight.BOLD),
-                    self.maße_field,
-                    ft.ElevatedButton("STEP Analyse", on_click=self.load_step_file,
-                                      tooltip="Sucht nach Eingabe von Programmnamen die STEP-Datei und berechnet Fertigteilgröße und Rohteilgröße.")
+                    #self.maße_field,
+                    #ft.ElevatedButton("STEP Analyse", on_click=self.load_step_file,
+                                      #tooltip="Sucht nach Eingabe von Programmnamen die STEP-Datei und berechnet Fertigteilgröße und Rohteilgröße.")
                 ]),
 
                 # Rechteck Eingabefelder
@@ -175,22 +219,44 @@ class BlankMakerApp:
                 ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
                 self.original_size_label,
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Kreis Sektion
                 ft.Text("Erzeuge Kreis", size=14, weight=ft.FontWeight.BOLD),
                 ft.Row([self.diameter_field, self.height2_field]),
                 ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Spannmittel Sektion
-                ft.Text("Spannmittel Auswahl:", size=12, weight=ft.FontWeight.BOLD),
+                ft.Text("Spannmittel Auswahl:", size=14, weight=ft.FontWeight.BOLD),
                 self.value_field,
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
                 ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
+
+
+                # Button Kombiablauf mit Play-Icon
+                ft.Container(
+                    content=ft.ElevatedButton(
+                        text="Kombiablauf Starten",
+                        icon=ft.Icons.PLAY_CIRCLE_FILL,  # icon
+                        on_click=self.start_kombiablauf,
+                        width=300,
+                        height=40,
+                        style=ft.ButtonStyle(
+                            bgcolor="#ADD8E6",  # Pastellgrün
+                            color=ft.Colors.BLACK,
+                            shape=ft.RoundedRectangleBorder(radius=5),
+                            padding=10,
+                            elevation=5
+                        ),
+                        tooltip="Auto Ausfüllen, Laden der DXF u. Schraubstockes, Pause:-) , Rohteil Definierung und Erstellung."
+                    ),
+                    alignment=ft.alignment.center,
+                    padding=ft.padding.symmetric(vertical=10)
+                ),
 
                 ft.Divider(height=20),
 
@@ -202,46 +268,86 @@ class BlankMakerApp:
 
                 ft.Divider(height=20),
 
-                # Python Commander Sektion
-                ft.Text("PythonCommander:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row([
-                    self.at_prefix_field,
-                    ft.ElevatedButton("switch reloaded", on_click=self.toggle_value)
-                ]),
-                ft.Row([
-                    self.project_name_field,
-                    self.back_button
-                ]),
+                #Python Commander aufgeteilt auf links und rechts
+                ft.Row(
+                    controls=[
+                        # Linke Spalte: Python Commander
+                        ft.Column(
+                            controls=[
+                                ft.Text("PythonCommander:", size=12, weight=ft.FontWeight.BOLD),
+                                ft.Row([
+                                    self.at_prefix_field,
+                                    ft.ElevatedButton("switch reloaded", on_click=self.toggle_value)
+                                ]),
+                                ft.Row([
+                                    self.project_name_field,
+                                    self.back_button
+                                ]),
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                            expand=True
+                        ),
 
-                # Haupt-Button - Fixed deprecated color usage
-                ft.FilledButton(
-                    "PROGRAMM",
-                    on_click=self.move_files,
-                    style=ft.ButtonStyle(
-                        color=ft.Colors.WHITE,
-                        bgcolor=ft.Colors.RED,
-                        text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
+                        # Rechte Spalte: Status Labels
+                        ft.Column(
+                            controls=[
+                                self.status_label,
+                                self.status_label1
+                            ],
+                            alignment=ft.MainAxisAlignment.END,
+                            horizontal_alignment=ft.CrossAxisAlignment.END,
+                            expand=True
+                        )
+                    ]
+                ),
+
+
+                # Button Programm Ausgeben mit Play-Icon in Rot
+                ft.Container(
+                    content=ft.ElevatedButton(
+                        text="PROGRAMM AUSGEBEN",
+                        icon=ft.Icons.SAVE,
+                        on_click=self.move_files,
+                        width=300,
+                        height=40,
+                        style=ft.ButtonStyle(
+                            bgcolor=ft.Colors.RED,  # kräftiges Rot
+                            color=ft.Colors.WHITE,  # weiße Schrift
+                            shape=ft.RoundedRectangleBorder(radius=5),
+                            padding=10,
+                            elevation=5,
+                            text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
+                        ),
+                        tooltip="Gibt das fertige Programm aus und kopiert die Daten in die Ablage."
                     ),
-                    height=60,
-                    width=200
+                    alignment=ft.alignment.center,
+                    padding=ft.padding.symmetric(vertical=20)
                 ),
 
                 ft.Divider(height=20),
 
-                # Prozess Buttons - Fixed deprecated color usage
+                # Prozess Buttons - grün rot
                 ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row([
-                    ft.ElevatedButton("Prozess Start", on_click=self.run_python_script, bgcolor=ft.Colors.LIGHT_GREEN),
-                    ft.ElevatedButton("Prozess Stop", on_click=self.kill_python_script)
-                ]),
+                ft.Row([self.start_button, self.stop_button]),
+                ft.Container(
+                    content=ft.Row([self.status_icon, self.status_text]),
+                    margin=ft.margin.only(top=5)
+                ),
+                ###########################################################################################
+                ft.Divider(height=20),  # Trennlinie
 
-                # Status Labels
-                self.status_label,
-                self.status_label1
+                # NEU: UI für externe Flet-Anwendung
+                ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
+                ft.Row([
+                    self.start_external_flet_button,
+                    self.stop_external_flet_button
+                ]),
+                self.external_flet_status_text,
+                ############################################################################################
             ],
-                scroll=ft.ScrollMode.AUTO,
-                spacing=10,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
+                expand=True,  # Column soll verfügbaren Platz ausfüllen
+            )
         )
 
     # Event Handler Funktionen
@@ -529,22 +635,181 @@ class BlankMakerApp:
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Programms: {e}")
 
+    # prozess.pyw starten und killen
     def run_python_script(self, e):
         try:
             script_path = base_path5
-            self.script_process = subprocess.Popen(["python", script_path],
-                                                   stdout=subprocess.PIPE,
-                                                   stderr=subprocess.PIPE,
-                                                   stdin=subprocess.PIPE,
-                                                   creationflags=subprocess.CREATE_NO_WINDOW)
+
+            # Prüfe ob bereits ein Prozess läuft
+            if self.script_process is not None and self.script_process.poll() is None:
+                self.show_dialog("Info", "Prozess läuft bereits!")
+                return
+
+            # Starte neuen Prozess
+            self.script_process = subprocess.Popen(
+                ["python", script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+
+            # UI aktualisieren
+            self.start_button.disabled = True
+            self.stop_button.disabled = False
+            self.status_icon.color = ft.Colors.GREEN
+            self.status_text.value = "Läuft"
+            self.status_text.color = ft.Colors.GREEN
+            self.page.update()
+
+            # Optional: Status-Überwachung in separatem Thread
+            self.page.run_task(self.monitor_process)
+
+        except FileNotFoundError:
+            self.show_dialog("Fehler", f"Skript nicht gefunden: {base_path5}")
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Skripts: {e}")
 
     def kill_python_script(self, e):
-        if self.script_process is not None:
-            self.script_process.kill()
-            self.script_process = None
+        if self.script_process is None:
+            self.show_dialog("Info", "Kein Prozess läuft!")
+            return
 
+        try:
+            # Prüfe ob Prozess noch läuft
+            if self.script_process.poll() is not None:
+                self.show_dialog("Info", "Prozess ist bereits beendet!")
+                self.reset_ui_to_stopped()
+                return
+
+            # Versuche graceful shutdown
+            self.script_process.terminate()
+
+            # Warte auf Beendigung (max 3 Sekunden)
+            try:
+                self.script_process.wait(timeout=3)
+                print("Prozess erfolgreich beendet")
+            except subprocess.TimeoutExpired:
+                # Force kill falls terminate() nicht funktioniert
+                print("Prozess antwortet nicht, force kill...")
+                self.script_process.kill()
+                self.script_process.wait(timeout=2)
+
+        except Exception as ex:
+            print(f"Fehler beim Beenden: {ex}")
+            # Als letzter Ausweg - OS-Level kill
+            try:
+                import os, signal
+                if hasattr(self.script_process, 'pid'):
+                    os.kill(self.script_process.pid, signal.SIGTERM)
+            except:
+                pass
+        finally:
+            self.script_process = None
+            self.reset_ui_to_stopped()
+
+    def reset_ui_to_stopped(self):
+        """Setzt die UI auf 'gestoppt' zurück"""
+        self.start_button.disabled = False
+        self.stop_button.disabled = True
+        self.status_icon.color = ft.Colors.RED
+        self.status_text.value = "Gestoppt"
+        self.status_text.color = ft.Colors.RED
+        self.page.update()
+
+    async def monitor_process(self):
+        """Überwacht den Prozess-Status"""
+        while self.script_process is not None:
+            if self.script_process.poll() is not None:
+                # Prozess ist beendet
+                print("Prozess wurde beendet")
+                self.script_process = None
+                self.reset_ui_to_stopped()
+                break
+            await asyncio.sleep(1)  # Prüfe jede Sekunde
+
+    #######################################################################################################
+    # NEU: Methoden zum Starten und Stoppen der externen Flet-Anwendung
+    def start_external_flet_app(self, e):
+        try:
+            if not os.path.exists(PATH_TO_EXTERNAL_FLET_APP):
+                self.show_dialog("Fehler", f"Externe Flet App nicht gefunden unter: {PATH_TO_EXTERNAL_FLET_APP}")
+                return
+
+            if self.external_flet_process is not None and self.external_flet_process.poll() is None:
+                self.show_dialog("Info", "Externe Flet App läuft bereits!")
+                return
+
+            # Starte die externe Flet-App.
+            # 'python' oder 'pythonw'. 'pythonw' versteckt das Konsolenfenster unter Windows.
+            # Für Flet-Apps ist das Konsolenfenster oft nicht nötig, da sie ihre eigene GUI haben.
+            # creationflags ist nützlich unter Windows, um das cmd-Fenster zu unterdrücken.
+            self.external_flet_process = subprocess.Popen(
+                ["python", PATH_TO_EXTERNAL_FLET_APP],  # oder "pythonw"
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+            )
+
+            self.start_external_flet_button.disabled = True
+            self.stop_external_flet_button.disabled = False
+            self.external_flet_status_text.value = "Externe Flet App: Läuft"
+            self.external_flet_status_text.color = ft.Colors.GREEN_ACCENT_700
+            self.page.update()
+            self.page.run_task(self.monitor_external_flet_process)  # Eigene Monitor-Funktion
+
+        except Exception as ex:
+            self.show_dialog("Fehler", f"Fehler beim Starten der externen Flet App: {ex}")
+            self.external_flet_status_text.value = f"Externe Flet App: Startfehler"
+            self.external_flet_status_text.color = ft.Colors.RED
+            self.start_external_flet_button.disabled = False  # Start wieder erlauben
+            self.stop_external_flet_button.disabled = True
+            self.page.update()
+
+    def stop_external_flet_app(self, e):
+        if self.external_flet_process is None or self.external_flet_process.poll() is not None:
+            self.show_dialog("Info", "Externe Flet App läuft nicht oder wurde bereits beendet.")
+            self.reset_external_flet_ui_to_stopped()
+            return
+
+        try:
+            self.external_flet_process.terminate()  # Sendet SIGTERM (freundliche Anfrage zum Beenden)
+            try:
+                # Warte kurz, ob der Prozess von selbst terminiert
+                self.external_flet_process.wait(timeout=10)  # 5 Sekunden Timeout
+                print("Externe Flet App erfolgreich via terminate() beendet.")
+            except subprocess.TimeoutExpired:
+                # Wenn terminate() nicht reicht, erzwinge das Beenden
+                print("Externe Flet App reagiert nicht auf terminate(), versuche kill()...")
+                self.external_flet_process.kill()  # Sendet SIGKILL (sofortiges Beenden)
+                self.external_flet_process.wait(timeout=2)  # Kurz warten auf kill
+                print("Externe Flet App via kill() beendet.")
+        except Exception as ex:
+            self.show_dialog("Fehler", f"Problem beim Beenden der externen Flet App: {ex}")
+            # Versuche, den Prozess im Fehlerfall trotzdem als beendet zu markieren
+            print(f"Fehler beim Stoppen der externen Flet App: {ex}")
+        finally:
+            self.external_flet_process = None
+            self.reset_external_flet_ui_to_stopped()
+
+    def reset_external_flet_ui_to_stopped(self):
+        self.start_external_flet_button.disabled = False
+        self.stop_external_flet_button.disabled = True
+        self.external_flet_status_text.value = "Externe Flet App: Gestoppt"
+        self.external_flet_status_text.color = ft.Colors.GREY
+        self.page.update()
+
+    async def monitor_external_flet_process(self):
+        """Überwacht den externen Flet-Prozess-Status"""
+        while self.external_flet_process is not None:
+            if self.external_flet_process.poll() is not None:
+                # Prozess ist beendet (entweder durch unseren Stop-Button oder manuell vom User)
+                print("Externe Flet App wurde beendet.")
+                self.external_flet_process = None  # Wichtig, um den Zustand zu aktualisieren
+                self.reset_external_flet_ui_to_stopped()
+                break
+            await asyncio.sleep(1)  # Prüfe jede Sekunde
+                ###################################################################################################
+
+    #B Seitenautomatisierung
     def start_bseite(self, e):
         try:
             partheight_str = self.blength_field.value.replace(',', '.')
@@ -674,6 +939,21 @@ class BlankMakerApp:
 
 
 def main(page: ft.Page):
+    # Fensterkonfiguration
+    page.title = "BMM 9.FLET by Gschwendtner Johannes"
+
+    # KORREKTUR: Verwende page.window statt direkter Attribute
+    page.window.width = 600
+    page.window.height = 1400
+    page.window.resizable = True
+    page.window.maximizable = True
+    page.window.left = 0
+    page.window.top = 0
+
+    # Zentrierung
+    #page.window.center()
+
+    page.theme_mode = ft.ThemeMode.LIGHT
     app = BlankMakerApp(page)
 
 
