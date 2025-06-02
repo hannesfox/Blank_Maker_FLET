@@ -160,13 +160,13 @@ class BlankMakerApp:
         self.start_external_flet_button = ft.ElevatedButton(
             "Externe Flet App STARTEN",
             on_click=self.start_external_flet_app,
-            bgcolor=ft.Colors.BLUE_ACCENT_700,
+            bgcolor=ft.Colors.GREEN_ACCENT_700,
             color=ft.Colors.WHITE,
         )
         self.stop_external_flet_button = ft.ElevatedButton(
             "Externe Flet App STOPPEN",
             on_click=self.stop_external_flet_app,
-            bgcolor=ft.Colors.ORANGE_ACCENT_700,
+            bgcolor=ft.Colors.RED_ACCENT_700,
             color=ft.Colors.WHITE,
             disabled=True  # Am Anfang ist nichts zu stoppen
         )
