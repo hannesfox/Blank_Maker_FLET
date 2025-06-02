@@ -322,7 +322,7 @@ class BlankMakerApp:
                 ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
                 ft.Row([
                     self.start_external_flet_button,
-                    self.stop_external_flet_button
+                    #self.stop_external_flet_button
                 ]),
                 self.external_flet_status_text,
                 ############################################################################################
