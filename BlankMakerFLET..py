@@ -9,7 +9,7 @@
 
 # Autor: [Gschwendtner Johannes]
 # Datum: [30.05.2025]
-# Version: [9.0 - Flet Version]
+# Version: [9. - Flet Version]
 
 import flet as ft
 from program1 import create_rectangle
