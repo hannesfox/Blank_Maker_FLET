@@ -30,7 +30,7 @@ from pathlib import Path
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
 
-# Pfade zum Ändern
+# Pfade zum Ändern alt
 # base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
 # base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
 # base_path3 = "WKS05"  # Auswahl von WKS Ordner
@@ -72,7 +72,9 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
+        #alt
         #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        #pathlib neu
         self.base_path4 = Path(f"K:/Esprit/NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}")
 
         self.history = []  # Für Zurück-Button
