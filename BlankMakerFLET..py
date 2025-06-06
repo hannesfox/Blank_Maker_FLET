@@ -26,17 +26,26 @@ import glob
 import subprocess
 import datetime
 import asyncio
+from pathlib import Path
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
 
 # Pfade zum Ändern
-base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
-base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
-base_path3 = "WKS05"  # Auswahl von WKS Ordner
-# base_path4 wird in init belegt
-base_path5 = "C:\\Users\\Gschwendtner\\PycharmProjects\\Blank_Maker_FLET\\prozess.pyw"
-# pfad für flet CRC App
-PATH_TO_EXTERNAL_FLET_APP = r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py"
+# base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
+# base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
+# base_path3 = "WKS05"  # Auswahl von WKS Ordner
+# # base_path4 wird in init belegt
+# base_path5 = "C:\\Users\\Gschwendtner\\PycharmProjects\\Blank_Maker_FLET\\prozess.pyw"
+# # pfad für flet CRC App
+# PATH_TO_EXTERNAL_FLET_APP = r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py"
+
+# Pfade zum Ändern mit pathlib
+base_path1 = Path(r"C:\Users\Gschwendtner\Desktop\Spannmittel")  # Pfad für Spannmittelordner
+base_path2 = Path(r"K:\NC-PGM")  # NC-PGM Ausgabeordner Esprit
+base_path3 = Path("WKS05")  # Auswahl von WKS Ordner (relativer Pfad)
+base_path5 = Path(r"C:\Users\Gschwendtner\PycharmProjects\Blank_Maker_FLET\prozess.pyw")  # Flet-App-Pfad
+PATH_TO_EXTERNAL_FLET_APP = Path(r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py")
+
 
 class BlankMakerApp:
     def __init__(self, page: ft.Page):
@@ -63,7 +72,8 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        self.base_path4 = Path(f"K:/Esprit/NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}")
 
         self.history = []  # Für Zurück-Button
         self.updating = False  # Flag zur Vermeidung von rekursiven Aufrufen
@@ -155,7 +165,6 @@ class BlankMakerApp:
             color=ft.Colors.RED
         )
 
-        #################################################################################################
         # NEU: Buttons und Status für die externe Flet-Anwendung
         self.start_external_flet_button = ft.ElevatedButton(
             "Externe Flet App STARTEN",
@@ -175,7 +184,7 @@ class BlankMakerApp:
             size=12,
             color=ft.Colors.GREY
         )
-        ####################################################################################################
+
 
     def build_ui(self):
         # UI Layout erstellen
@@ -191,9 +200,6 @@ class BlankMakerApp:
                 # Rohteil Maße Eingabe
                 ft.Row([
                     ft.Text("Erzeuge Rechteck", size=14, weight=ft.FontWeight.BOLD),
-                    #self.maße_field,
-                    #ft.ElevatedButton("STEP Analyse", on_click=self.load_step_file,
-                                      #tooltip="Sucht nach Eingabe von Programmnamen die STEP-Datei und berechnet Fertigteilgröße und Rohteilgröße.")
                 ]),
 
                 # Rechteck Eingabefelder
@@ -315,7 +321,7 @@ class BlankMakerApp:
                     content=ft.Row([self.status_icon, self.status_text]),
                     margin=ft.margin.only(top=5)
                 ),
-                ###########################################################################################
+
                 ft.Divider(height=20),  # Trennlinie
 
                 # NEU: UI für externe Flet-Anwendung
@@ -325,7 +331,6 @@ class BlankMakerApp:
                     #self.stop_external_flet_button
                 ]),
                 self.external_flet_status_text,
-                ############################################################################################
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
@@ -710,7 +715,6 @@ class BlankMakerApp:
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
 
-    #######################################################################################################
     # NEU: Methoden zum Starten und Stoppen der externen Flet-Anwendung
     def start_external_flet_app(self, e):
         try:
@@ -722,10 +726,6 @@ class BlankMakerApp:
                 self.show_dialog("Info", "Externe Flet App läuft bereits!")
                 return
 
-            # Starte die externe Flet-App.
-            # 'python' oder 'pythonw'. 'pythonw' versteckt das Konsolenfenster unter Windows.
-            # Für Flet-Apps ist das Konsolenfenster oft nicht nötig, da sie ihre eigene GUI haben.
-            # creationflags ist nützlich unter Windows, um das cmd-Fenster zu unterdrücken.
             self.external_flet_process = subprocess.Popen(
                 ["python", PATH_TO_EXTERNAL_FLET_APP],  # oder "pythonw"
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
@@ -789,7 +789,7 @@ class BlankMakerApp:
                 self.reset_external_flet_ui_to_stopped()
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
-                ###################################################################################################
+
 
     #B Seitenautomatisierung
     def start_bseite(self, e):
@@ -803,9 +803,6 @@ class BlankMakerApp:
             # Übergebe self.page an start_mausbewegungen
             start_mausbewegungen(self.page, partheight) # NEU: self.page übergeben
 
-            # Optional: Eine kleine Bestätigung im Hauptfenster, dass der Prozess gestartet wurde,
-            # da der eigentliche Dialog erst am Ende von start_mausbewegungen erscheint.
-            # self.show_dialog("Info", "B-Seiten Automatisierung gestartet...")
 
         except ValueError:
             self.show_dialog("Fehler", "Ungültige Eingabe für Fertigteilhöhe. Bitte eine Zahl eingeben.")
