@@ -28,29 +28,53 @@ import datetime
 import asyncio
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
+from pathlib import Path
 
-#neue pfade für mac
-if os.name == 'nt':
-    base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
+# ==============================================================================
+#  KONFIGURATION: PFADE FÜR WINDOWS & MAC
+# ==============================================================================
+# Das Skript erkennt automatisch, ob es auf Windows oder macOS läuft.
+# Die Pfade werden entsprechend der Erkennung gesetzt.
+
+# Automatische Erkennung des Betriebssystems
+IS_WINDOWS = os.name == 'nt'
+
+if IS_WINDOWS:
+    # --- WINDOWS PFADE ---
+    # Annahme: Dein Benutzerprofil ist der Standard (z.B. C:\Users\Gschwendtner)
+    user_profile = Path.home()
+    # Netzlaufwerke
+    net_drive_k = Path(r"K:")
+
+    # Basispfade für Windows
+    base_path1 = user_profile / "Desktop" / "Spannmittel"
+    base_path2 = net_drive_k / "NC-PGM"
+    esprit_base_path = net_drive_k / "Esprit"
+    base_path5 = user_profile / "PycharmProjects" / "Blank_Maker_FLET" / "prozess.pyw"
+    PATH_TO_EXTERNAL_FLET_APP = user_profile / "PycharmProjects" / "ProzessORC" / "Flet-ProzessOCR-1.0.py"
+
 else:
-    base_path1 = "/Pfade-Mac/Spannmittel"  # Fake Pfad für Spannmittelordner
+    # --- MACOS PFADE (ANGEPASST AN DEINE VORGABEN) ---
 
-if os.name == 'nt':
-    base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
-else:
-    base_path2 = "/Pfade-Mac/NC-PGM"  # NC-PGM
+    # Die folgenden Pfade sind absolute Pfade, wie von dir angegeben.
+    base_path1 = Path("/Pfade-Mac/Spannmittel")
+    base_path2 = Path("/Pfade-Mac/NC-PGM")
+    esprit_base_path = Path("/Pfade-Mac/Esprit")
 
-if os.name == 'nt':
-    base_path3 = "WKS05"
-else:
-    base_path3 = "/Pfade-Mac/NC-PGM/WKS05"
+    # ACHTUNG: Dieser Pfad liegt im Hauptverzeichnis. Bitte prüfen, ob das korrekt ist.
+    base_path5 = Path("/prozess.pyw")
 
-if os.name == 'nt':
-    base_path5 = "C:\\Users\\Gschwendtner\\Desktop\\Blank_Master_6.6\\prozess.pyw"
-else:
-    base_path5 = "/prozess.pyw"
+    # PFAD FÜR EXTERNE APP: Bitte hier den korrekten Mac-Pfad eintragen.
+    PATH_TO_EXTERNAL_FLET_APP = Path("/Users/hannes/Desktop/ProzessORC/Flet-ProzessOCR-1.0.py")
 
-PATH_TO_EXTERNAL_FLET_APP = "/Users/hannes/Desktop/ProzessORC/Flet-ProzessOCR-1.0.py"
+
+# Dieser Pfad ist für beide Systeme gleich, da er relativ zu base_path2 ist
+# und mit dem passenden Betriebssystem-Pfad kombiniert wird.
+base_path3 = Path("WKS05")
+
+# ==============================================================================
+#  ENDE DER KONFIGURATION
+# ==============================================================================
 
 
 class BlankMakerApp:
@@ -78,10 +102,12 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        if os.name == 'nt':
-            self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
-        else:
-            self.base_path4 = f"/Pfade-Mac/Esprit/NC-Files/AT-25-KW/1/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
+        #if os.name == 'nt':
+            #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        #else:
+            #self.base_path4 = f"/Pfade-Mac/Esprit/NC-Files/AT-25-KW/1/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
+
+        self.base_path4 = esprit_base_path / f"NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
 
         self.history = []  # Für Zurück-Button
         self.updating = False  # Flag zur Vermeidung von rekursiven Aufrufen
@@ -221,10 +247,27 @@ class BlankMakerApp:
 
                 ft.Divider(height=10),
 
-                # Kreis Sektion
-                ft.Text("Erzeuge Kreis", size=14, weight=ft.FontWeight.BOLD),
-                ft.Row([self.diameter_field, self.height2_field]),
-                ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
+                # Kreis Sektion (einklappbar)
+                ft.ExpansionPanelList(
+                    elevation=1,  # Ein leichter Schatten für die Optik
+                    controls=[
+                        ft.ExpansionPanel(
+                            # Das ist die Kopfzeile, die immer sichtbar ist
+                            header=ft.ListTile(
+                                title=ft.Text("Erzeuge Kreis", weight=ft.FontWeight.BOLD),
+                            ),
+                            # Das ist der Inhalt, der ein- und ausgeklappt wird
+                            content=ft.Container(
+                                content=ft.Column([
+                                    ft.Row([self.diameter_field, self.height2_field]),
+                                    ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
+                                ]),
+                                padding=ft.padding.only(left=15, right=15, bottom=15)  # Etwas Abstand für die Optik
+                            ),
+                        )
+                    ]
+                ),
+
 
                 ft.Divider(height=10),
 
