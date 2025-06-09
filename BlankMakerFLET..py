@@ -33,15 +33,12 @@ from pathlib import Path
 # ==============================================================================
 #  KONFIGURATION: PFADE FÜR WINDOWS & MAC
 # ==============================================================================
-# Das Skript erkennt automatisch, ob es auf Windows oder macOS läuft.
-# Die Pfade werden entsprechend der Erkennung gesetzt.
+
 
 # Automatische Erkennung des Betriebssystems
 IS_WINDOWS = os.name == 'nt'
 
 if IS_WINDOWS:
-    # --- WINDOWS PFADE ---
-    # Annahme: Dein Benutzerprofil ist der Standard (z.B. C:\Users\Gschwendtner)
     user_profile = Path.home()
     # Netzlaufwerke
     net_drive_k = Path(r"K:")
@@ -54,22 +51,15 @@ if IS_WINDOWS:
     PATH_TO_EXTERNAL_FLET_APP = user_profile / "PycharmProjects" / "ProzessORC" / "Flet-ProzessOCR-1.0.py"
 
 else:
-    # --- MACOS PFADE (ANGEPASST AN DEINE VORGABEN) ---
-
-    # Die folgenden Pfade sind absolute Pfade, wie von dir angegeben.
+    # --- MACOS PFADE  ---
     base_path1 = Path("/Pfade-Mac/Spannmittel")
     base_path2 = Path("/Pfade-Mac/NC-PGM")
     esprit_base_path = Path("/Pfade-Mac/Esprit")
-
-    # ACHTUNG: Dieser Pfad liegt im Hauptverzeichnis. Bitte prüfen, ob das korrekt ist.
     base_path5 = Path("/prozess.pyw")
 
-    # PFAD FÜR EXTERNE APP: Bitte hier den korrekten Mac-Pfad eintragen.
+    # PFAD FÜR EXTERNE APP:
     PATH_TO_EXTERNAL_FLET_APP = Path("/Users/hannes/Desktop/ProzessORC/Flet-ProzessOCR-1.0.py")
-
-
-# Dieser Pfad ist für beide Systeme gleich, da er relativ zu base_path2 ist
-# und mit dem passenden Betriebssystem-Pfad kombiniert wird.
+#WKS pfad
 base_path3 = Path("WKS05")
 
 # ==============================================================================
@@ -102,11 +92,7 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        #if os.name == 'nt':
-            #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
-        #else:
-            #self.base_path4 = f"/Pfade-Mac/Esprit/NC-Files/AT-25-KW/1/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
-
+        #Pfad für Wochentagspeicherort
         self.base_path4 = esprit_base_path / f"NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
 
         self.history = []  # Für Zurück-Button
@@ -199,27 +185,25 @@ class BlankMakerApp:
             color=ft.Colors.RED
         )
 
-        #################################################################################################
         # NEU: Buttons und Status für die externe Flet-Anwendung
         self.start_external_flet_button = ft.ElevatedButton(
-            "ORC App STARTEN",
+            "Externe Flet App STARTEN",
             on_click=self.start_external_flet_app,
             bgcolor=ft.Colors.GREEN_ACCENT_700,
             color=ft.Colors.WHITE,
         )
         self.stop_external_flet_button = ft.ElevatedButton(
-            "ORC App STOPPEN",
+            "Externe Flet App STOPPEN",
             on_click=self.stop_external_flet_app,
             bgcolor=ft.Colors.RED_ACCENT_700,
             color=ft.Colors.WHITE,
             disabled=True  # Am Anfang ist nichts zu stoppen
         )
         self.external_flet_status_text = ft.Text(
-            "ORC App: Gestoppt",
+            "Externe Flet App: Gestoppt",
             size=12,
             color=ft.Colors.GREY
         )
-        ####################################################################################################
 
     def build_ui(self):
         # UI Layout erstellen
@@ -376,17 +360,15 @@ class BlankMakerApp:
                     content=ft.Row([self.status_icon, self.status_text]),
                     margin=ft.margin.only(top=5)
                 ),
-                ###########################################################################################
                 ft.Divider(height=20),  # Trennlinie
 
                 # NEU: UI für externe Flet-Anwendung
-                ft.Text("Externe Flet App (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
+                ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
                 ft.Row([
                     self.start_external_flet_button,
-                    self.stop_external_flet_button
+                    # self.stop_external_flet_button
                 ]),
                 self.external_flet_status_text,
-                ############################################################################################
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
@@ -771,7 +753,7 @@ class BlankMakerApp:
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
 
-    #######################################################################################################
+
     # NEU: Methoden zum Starten und Stoppen der externen Flet-Anwendung
     def start_external_flet_app(self, e):
         try:
@@ -783,10 +765,6 @@ class BlankMakerApp:
                 self.show_dialog("Info", "Externe Flet App läuft bereits!")
                 return
 
-            # Starte die externe Flet-App.
-            # 'python' oder 'pythonw'. 'pythonw' versteckt das Konsolenfenster unter Windows.
-            # Für Flet-Apps ist das Konsolenfenster oft nicht nötig, da sie ihre eigene GUI haben.
-            # creationflags ist nützlich unter Windows, um das cmd-Fenster zu unterdrücken.
             self.external_flet_process = subprocess.Popen(
                 ["python", PATH_TO_EXTERNAL_FLET_APP],  # oder "pythonw"
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
@@ -850,7 +828,7 @@ class BlankMakerApp:
                 self.reset_external_flet_ui_to_stopped()
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
-                ###################################################################################################
+
 
     #B Seitenautomatisierung
     def start_bseite(self, e):
