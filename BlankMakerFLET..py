@@ -212,11 +212,27 @@ class BlankMakerApp:
                 ft.Divider(height=10),
 
                 # Kreis Sektion
-                ft.Text("Erzeuge Kreis", size=14, weight=ft.FontWeight.BOLD),
-                ft.Row([self.diameter_field, self.height2_field]),
-                ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
+                ft.ExpansionPanelList(
+                    elevation=1,  # Ein leichter Schatten für die Optik
+                    controls=[
+                        ft.ExpansionPanel(
+                            # Das ist die Kopfzeile, die immer sichtbar ist
+                            header=ft.ListTile(
+                                title=ft.Text("Erzeuge Kreis", weight=ft.FontWeight.BOLD),
+                            ),
+                            # Das ist der Inhalt, der ein- und ausgeklappt wird
+                            content=ft.Container(
+                                content=ft.Column([
+                                    ft.Row([self.diameter_field, self.height2_field]),
+                                    ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
+                                ]),
+                                padding=ft.padding.only(left=15, right=15, bottom=15)  # Etwas Abstand für die Optik
+                            ),
+                        )
+                    ]
+                ),
 
-                ft.Divider(height=10),
+                #ft.Divider(height=10),
 
                 # Spannmittel Sektion
                 ft.Text("Spannmittel Auswahl:", size=14, weight=ft.FontWeight.BOLD),
