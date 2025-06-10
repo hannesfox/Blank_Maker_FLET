@@ -186,7 +186,25 @@ class BlankMakerApp:
             size=12,
             color=ft.Colors.GREY
         )
-
+        self.rect_make_button = ft.ElevatedButton(
+            "MAKE ..",
+            on_click=self.animate_and_create_rect  # WICHTIG: Verweist auf die neue Animations-Methode
+        )
+        # Definiere, DASS und WIE die Hintergrundfarbe animiert werden soll
+        self.rect_make_button.animate_bgcolor = ft.animation.Animation(
+            duration=150,  # Dauer einer Farbanimation in ms
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+        # Füge dies zu den anderen UI-Definitionen hinzu
+        self.circle_make_button = ft.ElevatedButton(
+            "MAKE ..",
+            on_click=self.animate_and_create_circle  # Verweist auf die neue Handler-Methode
+        )
+        # Auch dieser Button braucht die Animations-Eigenschaft
+        self.circle_make_button.animate_bgcolor = ft.animation.Animation(
+            duration=150,
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
 
     def build_ui(self):
         # UI Layout erstellen
@@ -206,7 +224,8 @@ class BlankMakerApp:
 
                 # Rechteck Eingabefelder
                 ft.Row([self.length_field, self.width_field, self.height_field]),
-                ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
+                self.rect_make_button,
+                #ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
                 self.original_size_label,
 
                 ft.Divider(height=10),
@@ -224,7 +243,8 @@ class BlankMakerApp:
                             content=ft.Container(
                                 content=ft.Column([
                                     ft.Row([self.diameter_field, self.height2_field]),
-                                    ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
+                                    self.circle_make_button,
+                                    #ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
                                 ]),
                                 padding=ft.padding.only(left=15, right=15, bottom=15)  # Etwas Abstand für die Optik
                             ),
@@ -353,6 +373,42 @@ class BlankMakerApp:
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
             )
+        )
+
+    # MAKE button blinken lassen
+    async def animate_button_blink(self, button_to_animate, callback_function, e):
+        """
+        Lässt einen Button 5x grün aufleuchten und ruft danach eine Callback-Funktion auf.
+        """
+        original_color = button_to_animate.bgcolor
+
+        for _ in range(5):
+            button_to_animate.bgcolor = ft.Colors.GREEN_ACCENT_400
+            self.page.update()
+            await asyncio.sleep(0.15)
+
+            button_to_animate.bgcolor = original_color
+            self.page.update()
+            await asyncio.sleep(0.15)
+
+        # Nach der Animation die eigentliche Funktion ausführen
+        callback_function(e)
+
+    async def animate_and_create_circle(self, e):
+        # Ruft unsere allgemeine Blink-Funktion auf
+        await self.animate_button_blink(
+            button_to_animate=self.circle_make_button,
+            callback_function=self.create_circle,
+            e=e
+        )
+
+
+    async def animate_and_create_rect(self, e):
+        # Ruft ebenfalls unsere allgemeine Blink-Funktion auf
+        await self.animate_button_blink(
+            button_to_animate=self.rect_make_button,
+            callback_function=self.create_rect,
+            e=e
         )
 
     # Event Handler Funktionen
