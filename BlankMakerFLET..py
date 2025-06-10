@@ -205,6 +205,18 @@ class BlankMakerApp:
             duration=150,
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
+        self.vice_create_button = ft.ElevatedButton(
+            "Schraubstock erstellen",
+            # Wichtig: Verweist auf den neuen Handler, den wir gleich erstellen
+            on_click=self.animate_and_copy_file
+        )
+        # Dem Button die Fähigkeit geben, seine Farbe zu animieren
+        self.vice_create_button.animate_bgcolor = ft.animation.Animation(
+            duration=150,
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+
+    #-----------------------------------------ENDE Create ui Elements----------------------------------------
 
     def build_ui(self):
         # UI Layout erstellen
@@ -260,7 +272,8 @@ class BlankMakerApp:
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
-                ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
+                self.vice_create_button,
+                #ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
 
 
                 # Button Kombiablauf mit Play-Icon
@@ -375,6 +388,8 @@ class BlankMakerApp:
             )
         )
 
+    #-----------------------------------------UI Ende----------------------------------------
+
     # MAKE button blinken lassen
     async def animate_button_blink(self, button_to_animate, callback_function, e):
         """
@@ -408,6 +423,14 @@ class BlankMakerApp:
         await self.animate_button_blink(
             button_to_animate=self.rect_make_button,
             callback_function=self.create_rect,
+            e=e
+        )
+
+    # Schraubstock erstellen button binken lassen
+    async def animate_and_copy_file(self, e):
+        await self.animate_button_blink(
+            button_to_animate=self.vice_create_button,
+            callback_function=self.copy_file,
             e=e
         )
 
