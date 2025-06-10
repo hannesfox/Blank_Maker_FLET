@@ -216,6 +216,32 @@ class BlankMakerApp:
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
 
+        #programm ausgeben button aufleuchten lassen
+        self.export_button = ft.ElevatedButton(
+            text="PROGRAMM AUSGEBEN",
+            icon=ft.Icons.SAVE,
+            # Wichtig: Verweist auf die neue Animations-Methode
+            on_click=self.animate_and_move_files,
+            width=300,
+            height=40,
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.RED,  # Startfarbe ist Rot
+                color=ft.Colors.WHITE,
+                shape=ft.RoundedRectangleBorder(radius=5),
+                padding=10,
+                elevation=5,
+                text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
+            ),
+            tooltip="Gibt das fertige Programm aus und kopiert die Daten in die Ablage."
+        )
+
+        # Definiere die Animation für die Hintergrundfarbe.
+        # Ein längerer Übergang fühlt sich sanfter an.
+        self.export_button.animate_bgcolor = ft.animation.Animation(
+            duration=700,  # 700 Millisekunden für den Farbübergang
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+
     #-----------------------------------------ENDE Create ui Elements----------------------------------------
 
     def build_ui(self):
@@ -342,23 +368,9 @@ class BlankMakerApp:
 
 
                 # Button Programm Ausgeben mit Play-Icon in Rot
+                # Button Programm Ausgeben mit Play-Icon in Rot
                 ft.Container(
-                    content=ft.ElevatedButton(
-                        text="PROGRAMM AUSGEBEN",
-                        icon=ft.Icons.SAVE,
-                        on_click=self.move_files,
-                        width=300,
-                        height=40,
-                        style=ft.ButtonStyle(
-                            bgcolor=ft.Colors.RED,  # kräftiges Rot
-                            color=ft.Colors.WHITE,  # weiße Schrift
-                            shape=ft.RoundedRectangleBorder(radius=5),
-                            padding=10,
-                            elevation=5,
-                            text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
-                        ),
-                        tooltip="Gibt das fertige Programm aus und kopiert die Daten in die Ablage."
-                    ),
+                    content=self.export_button,  # Wir verwenden die neue Instanzvariable
                     alignment=ft.alignment.center,
                     padding=ft.padding.symmetric(vertical=20)
                 ),
@@ -400,11 +412,11 @@ class BlankMakerApp:
         for _ in range(5):
             button_to_animate.bgcolor = ft.Colors.GREEN_ACCENT_400
             self.page.update()
-            await asyncio.sleep(0.15)
+            await asyncio.sleep(0.1)
 
             button_to_animate.bgcolor = original_color
             self.page.update()
-            await asyncio.sleep(0.15)
+            await asyncio.sleep(0.1)
 
         # Nach der Animation die eigentliche Funktion ausführen
         callback_function(e)
@@ -433,6 +445,32 @@ class BlankMakerApp:
             callback_function=self.copy_file,
             e=e
         )
+    #programm ausgeben aufleuchten lassen
+    async def animate_and_move_files(self, e):
+        # 1. Button deaktivieren, um mehrfaches Klicken zu verhindern
+        self.export_button.disabled = True
+        self.page.update()  # KORREKTUR: Kein await und kein _async
+
+        # 2. Farbe zu einem schönen Grün ändern (der Übergang wird animiert)
+        self.export_button.bgcolor = ft.Colors.GREEN_700
+        self.page.update()  # KORREKTUR
+
+        # 3. 5 Sekunden warten, während der Button grün ist
+        await asyncio.sleep(5)
+
+        # 4. Farbe zurück zu Rot ändern (der Übergang wird wieder animiert)
+        self.export_button.bgcolor = ft.Colors.RED
+        self.page.update()  # KORREKTUR
+
+        # 5. Warten, bis die Rück-Animation abgeschlossen ist (wichtig für die Optik)
+        await asyncio.sleep(0.7)  # Muss der Dauer von animate_bgcolor entsprechen
+
+        # 6. Button wieder aktivieren
+        self.export_button.disabled = False
+        self.page.update()  # KORREKTUR
+
+        # 7. Erst jetzt die eigentliche Dateiverschiebung starten
+        self.move_files(e)
 
     # Event Handler Funktionen
     def on_width_change(self, e):
