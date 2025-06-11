@@ -134,8 +134,8 @@ class BlankMakerApp:
         self.back_button = ft.ElevatedButton("Zurück", on_click=self.go_back, disabled=True)
 
         # Status Labels - Fixed deprecated color usage
-        self.status_label = ft.Text("", size=12, color=ft.Colors.GREEN)
-        self.status_label1 = ft.Text("", size=12, color=ft.Colors.BLUE)
+        self.status_label = ft.Text("", size=15, color=ft.Colors.GREEN)
+        self.status_label1 = ft.Text("", size=15, color=ft.Colors.BLUE)
         self.original_size_label = ft.Text("", size=8)
 
         # Prozess Öffnen button
@@ -191,7 +191,7 @@ class BlankMakerApp:
             on_click=self.animate_and_create_rect  # WICHTIG: Verweist auf die neue Animations-Methode
         )
         # Definiere, DASS und WIE die Hintergrundfarbe animiert werden soll
-        self.rect_make_button.animate_bgcolor = ft.animation.Animation(
+        self.rect_make_button.animate_bgcolor = ft.Animation(
             duration=150,  # Dauer einer Farbanimation in ms
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
@@ -201,7 +201,7 @@ class BlankMakerApp:
             on_click=self.animate_and_create_circle  # Verweist auf die neue Handler-Methode
         )
         # Auch dieser Button braucht die Animations-Eigenschaft
-        self.circle_make_button.animate_bgcolor = ft.animation.Animation(
+        self.circle_make_button.animate_bgcolor = ft.Animation(
             duration=150,
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
@@ -211,7 +211,7 @@ class BlankMakerApp:
             on_click=self.animate_and_copy_file
         )
         # Dem Button die Fähigkeit geben, seine Farbe zu animieren
-        self.vice_create_button.animate_bgcolor = ft.animation.Animation(
+        self.vice_create_button.animate_bgcolor = ft.Animation(
             duration=150,
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
@@ -236,7 +236,7 @@ class BlankMakerApp:
         )
 
         # Definiere die Animation für die Hintergrundfarbe.
-        self.export_button.animate_bgcolor = ft.animation.Animation(
+        self.export_button.animate_bgcolor = ft.Animation(
             duration=2500,  # Millisekunden für den Farbübergang
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
@@ -252,7 +252,7 @@ class BlankMakerApp:
                 self.ctrl_v_field,
                 self.selection_dropdown,
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Rohteil Maße Eingabe
                 ft.Row([
@@ -322,7 +322,7 @@ class BlankMakerApp:
                     padding=ft.padding.symmetric(vertical=10)
                 ),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # B-Seite
                 ft.Row([
@@ -330,7 +330,7 @@ class BlankMakerApp:
                     ft.ElevatedButton("B-Start", on_click=self.start_bseite)
                 ]),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 #Python Commander aufgeteilt auf links und rechts
                 ft.Row(
@@ -374,7 +374,7 @@ class BlankMakerApp:
                     padding=ft.padding.symmetric(vertical=20)
                 ),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Prozess Buttons - grün rot
                 ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
@@ -384,7 +384,7 @@ class BlankMakerApp:
                     margin=ft.margin.only(top=5)
                 ),
 
-                ft.Divider(height=20),  # Trennlinie
+                ft.Divider(height=10),  # Trennlinie
 
                 # NEU: UI für externe Flet-Anwendung
                 ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
