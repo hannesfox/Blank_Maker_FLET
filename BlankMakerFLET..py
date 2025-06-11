@@ -275,15 +275,12 @@ class BlankMakerApp:
 
                 ft.Divider(height=40),
 
-                # ================================================================= #
-                # ===== HIER BEGINNT DER NEUE, STABILE BEREICH MIT TABS         ===== #
-                # ================================================================= #
 
                 ft.Text("Rohteil Erstellung:", size=16, weight=ft.FontWeight.BOLD),
 
-                # Wir packen die Tabs in einen Container mit fester Höhe, um Layout-Probleme zu vermeiden.
+                # tabs
                 ft.Container(
-                    height=220,  # Feste Höhe, die das "Zusammenschieben" verhindert.
+                    height=220,
                     content=ft.Tabs(
                         selected_index=0,
                         animation_duration=500,
@@ -291,7 +288,6 @@ class BlankMakerApp:
                             # Tab 1: Rechteck erstellen
                             ft.Tab(
                                 text="Rechteck",
-                                # KORREKTUR: ft.Icons mit großem "I" verwendet, passend zu deinem Code.
                                 icon=ft.Icons.RECTANGLE,
                                 content=ft.Container(
                                     content=ft.Column(
@@ -300,7 +296,6 @@ class BlankMakerApp:
                                             self.rect_make_button,
                                             self.original_size_label,
                                         ],
-                                        # Zentriert die Elemente etwas besser und gibt ihnen Luft zum Atmen.
                                         alignment=ft.MainAxisAlignment.SPACE_AROUND
                                     ),
                                     padding=ft.padding.symmetric(horizontal=5),
@@ -310,7 +305,6 @@ class BlankMakerApp:
                             # Tab 2: Kreis erstellen
                             ft.Tab(
                                 text="Kreis",
-                                # KORREKTUR: ft.Icons mit großem "I" verwendet.
                                 icon=ft.Icons.CIRCLE_OUTLINED,
                                 content=ft.Container(
                                     content=ft.Column(
@@ -319,7 +313,6 @@ class BlankMakerApp:
                                             self.circle_make_button,
                                             self.original_size_label,
                                         ],
-                                        # Zentriert die Elemente etwas besser.
                                         alignment=ft.MainAxisAlignment.SPACE_AROUND
                                     ),
                                     padding=ft.padding.symmetric(horizontal=5),
@@ -327,19 +320,12 @@ class BlankMakerApp:
                             ),
                         ],
                         expand=True,
-                        # expand=True ist hier korrekt, da der übergeordnete Container eine feste Höhe hat.
                     ),
-                    # Ein leichter Rahmen, um den Bereich optisch abzugrenzen
+                    # Rahmen
                     border=ft.border.all(2, ft.Colors.GREY_300),
                     border_radius=ft.border_radius.all(8),
                     padding=5,
                 ),
-
-                #ft.Divider(height=20),  # Etwas mehr Abstand nach dem neuen Block
-
-                # ================================================================= #
-                # ===== HIER ENDET DER NEUE BEREICH =============================== #
-                # ================================================================= #
 
                 # Spannmittel Sektion
                 ft.Text("Spannmittel Auswahl:", size=16, weight=ft.FontWeight.BOLD),
@@ -424,24 +410,20 @@ class BlankMakerApp:
 
                 ft.Divider(height=10),
 
-                # ================================================================= #
-                # ===== NEUER, HORIZONTAL AUFGETEILTER PROZESS-BEREICH          ===== #
-                # ================================================================= #
-
                 ft.Row(
                     controls=[
-                        # Linke Spalte: Interner Prozess
+                        # Linke Spalte
                         ft.Container(
                             content=ft.Column(
                                 [
                                     ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
                                     ft.Row(
                                         [self.start_button, self.stop_button],
-                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert die Buttons
+                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
                                     ),
                                     ft.Row(
                                         [self.status_icon, self.status_text],
-                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert den Status
+                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
                                     ),
                                 ],
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -464,11 +446,9 @@ class BlankMakerApp:
                                     ft.Row(
                                         [
                                             self.start_external_flet_button,
-                                            # self.stop_external_flet_button # Dein auskommentierter Button
                                         ],
-                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert den Button
+                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
                                     ),
-                                    # Wir packen den Status-Text in eine Row für konsistentes Alignment
                                     ft.Row(
                                         [self.external_flet_status_text],
                                         alignment=ft.MainAxisAlignment.CENTER
@@ -476,7 +456,7 @@ class BlankMakerApp:
                                 ],
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             ),
-                            expand=True,  # Nimmt 50% der Breite ein
+                            expand=True,
                             padding=10,
                             border=ft.border.all(1, ft.Colors.GREY_300),
                             border_radius=ft.border_radius.all(8),
@@ -484,10 +464,6 @@ class BlankMakerApp:
                     ],
                     vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
-
-                # ================================================================= #
-                # ===== ENDE DES NEUEN BEREICHS =================================== #
-                # ================================================================= #
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
@@ -543,25 +519,23 @@ class BlankMakerApp:
     async def animate_and_move_files(self, e):
         # 1. Button deaktivieren, um mehrfaches Klicken zu verhindern
         self.export_button.disabled = True
-        self.page.update()  # KORREKTUR: Kein await und kein _async
+        self.page.update()
 
         # 2. Farbe zu einem schönen Grün ändern (der Übergang wird animiert)
         self.export_button.bgcolor = ft.Colors.GREEN_700
-        self.page.update()  # KORREKTUR
+        self.page.update()
 
-        # 3. 5 Sekunden warten, während der Button grün ist
         await asyncio.sleep(1)
 
         # 4. Farbe zurück zu Rot ändern (der Übergang wird wieder animiert)
         self.export_button.bgcolor = ft.Colors.RED
-        self.page.update()  # KORREKTUR
+        self.page.update()
 
-        # 5. Warten, bis die Rück-Animation abgeschlossen ist (wichtig für die Optik)
         await asyncio.sleep(2,5)  # Muss der Dauer von animate_bgcolor entsprechen
 
         # 6. Button wieder aktivieren
         self.export_button.disabled = False
-        self.page.update()  # KORREKTUR
+        self.page.update()
 
         # 7. Erst jetzt die eigentliche Dateiverschiebung starten
         self.move_files(e)
@@ -580,7 +554,6 @@ class BlankMakerApp:
         self.page.update()
 
     def start_kombiablauf(self, e):
-        # Übergebe self.page und die Flet-Steuerelemente
         kombi = Kombiablauf(self.page, # Hinzugefügt: Die Flet Page Instanz
                            self.ctrl_v_field,
                            self.selection_dropdown,
@@ -591,7 +564,6 @@ class BlankMakerApp:
         try:
             kombi.kombiablauf()
         except Exception as ex_kombi_start:
-            # Falls kombiablauf() selbst eine Exception wirft, bevor die interne Fehlerbehandlung greift
             self.show_dialog("Fehler Kombiablauf", f"Startfehler im Kombiablauf: {ex_kombi_start}")
 
     def on_entry_change(self, e):
@@ -688,6 +660,8 @@ class BlankMakerApp:
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Kopieren der Datei: {e}")
 
+
+    #Pyautogui Automatisierung noch nicht ausgelagert
     def execute_actions(self, e):
         try:
             self.action_1()
