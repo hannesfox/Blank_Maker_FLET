@@ -232,13 +232,12 @@ class BlankMakerApp:
                 elevation=5,
                 text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
             ),
-            tooltip="Gibt das fertige Programm aus und kopiert die Daten in die Ablage."
+            tooltip="Gibt die fertigen Programm aus."
         )
 
         # Definiere die Animation für die Hintergrundfarbe.
-        # Ein längerer Übergang fühlt sich sanfter an.
         self.export_button.animate_bgcolor = ft.animation.Animation(
-            duration=700,  # 700 Millisekunden für den Farbübergang
+            duration=2500,  # Millisekunden für den Farbübergang
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
 
@@ -367,7 +366,7 @@ class BlankMakerApp:
                 ),
 
 
-                # Button Programm Ausgeben mit Play-Icon in Rot
+
                 # Button Programm Ausgeben mit Play-Icon in Rot
                 ft.Container(
                     content=self.export_button,  # Wir verwenden die neue Instanzvariable
@@ -456,14 +455,14 @@ class BlankMakerApp:
         self.page.update()  # KORREKTUR
 
         # 3. 5 Sekunden warten, während der Button grün ist
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
 
         # 4. Farbe zurück zu Rot ändern (der Übergang wird wieder animiert)
         self.export_button.bgcolor = ft.Colors.RED
         self.page.update()  # KORREKTUR
 
         # 5. Warten, bis die Rück-Animation abgeschlossen ist (wichtig für die Optik)
-        await asyncio.sleep(0.7)  # Muss der Dauer von animate_bgcolor entsprechen
+        await asyncio.sleep(2,5)  # Muss der Dauer von animate_bgcolor entsprechen
 
         # 6. Button wieder aktivieren
         self.export_button.disabled = False
