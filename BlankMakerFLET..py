@@ -9,7 +9,7 @@
 
 # Autor: [Gschwendtner Johannes]
 # Datum: [30.05.2025]
-# Version: [9.0 - Flet Version]
+# Version: [9.1 - Flet Version]
 
 import flet as ft
 from program1 import create_rectangle
@@ -26,9 +26,9 @@ import glob
 import subprocess
 import datetime
 import asyncio
+from pathlib import Path
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
-from pathlib import Path
 
 # ==============================================================================
 #  KONFIGURATION: PFADE FÜR WINDOWS & MAC
@@ -52,15 +52,15 @@ if IS_WINDOWS:
 
 else:
     # --- MACOS PFADE  ---
-    base_path1 = Path("/Pfade-Mac/Spannmittel")
+    base_path1 = Path("/Users/hannes/Desktop/Blank_Maker_FLET/Pfade-Mac/Spannmittel")
     base_path2 = Path("/Pfade-Mac/NC-PGM")
     esprit_base_path = Path("/Pfade-Mac/Esprit")
     base_path5 = Path("/prozess.pyw")
 
     # PFAD FÜR EXTERNE APP:
     PATH_TO_EXTERNAL_FLET_APP = Path("/Users/hannes/Desktop/ProzessORC/Flet-ProzessOCR-1.0.py")
-#WKS pfad
-base_path3 = Path("WKS05")
+    #WKS pfad
+    base_path3 = Path("WKS05")
 
 # ==============================================================================
 #  ENDE DER KONFIGURATION
@@ -92,7 +92,10 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        #Pfad für Wochentagspeicherort
+        #Windoof
+        #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
+        #pathlib neu
+        # Pfad für Wochentagspeicherort
         self.base_path4 = esprit_base_path / f"NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
 
         self.history = []  # Für Zurück-Button
@@ -152,8 +155,8 @@ class BlankMakerApp:
         self.back_button = ft.ElevatedButton("Zurück", on_click=self.go_back, disabled=True)
 
         # Status Labels - Fixed deprecated color usage
-        self.status_label = ft.Text("", size=12, color=ft.Colors.GREEN)
-        self.status_label1 = ft.Text("", size=12, color=ft.Colors.BLUE)
+        self.status_label = ft.Text("", size=15, color=ft.Colors.GREEN)
+        self.status_label1 = ft.Text("", size=15, color=ft.Colors.BLUE)
         self.original_size_label = ft.Text("", size=8)
 
         # Prozess Öffnen button
@@ -204,6 +207,62 @@ class BlankMakerApp:
             size=12,
             color=ft.Colors.GREY
         )
+        self.rect_make_button = ft.ElevatedButton(
+            "MAKE ..",
+            on_click=self.animate_and_create_rect  # WICHTIG: Verweist auf die neue Animations-Methode
+        )
+        # Definiere, DASS und WIE die Hintergrundfarbe animiert werden soll
+        self.rect_make_button.animate_bgcolor = ft.Animation(
+            duration=150,  # Dauer einer Farbanimation in ms
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+        # Füge dies zu den anderen UI-Definitionen hinzu
+        self.circle_make_button = ft.ElevatedButton(
+            "MAKE ..",
+            on_click=self.animate_and_create_circle  # Verweist auf die neue Handler-Methode
+        )
+        # Auch dieser Button braucht die Animations-Eigenschaft
+        self.circle_make_button.animate_bgcolor = ft.Animation(
+            duration=150,
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+        self.vice_create_button = ft.ElevatedButton(
+            "Schraubstock erstellen",
+            # Wichtig: Verweist auf den neuen Handler, den wir gleich erstellen
+            on_click=self.animate_and_copy_file
+        )
+        # Dem Button die Fähigkeit geben, seine Farbe zu animieren
+        self.vice_create_button.animate_bgcolor = ft.Animation(
+            duration=150,
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+
+        #programm ausgeben button aufleuchten lassen
+        self.export_button = ft.ElevatedButton(
+            text="PROGRAMM AUSGEBEN",
+            icon=ft.Icons.SAVE,
+            # Wichtig: Verweist auf die neue Animations-Methode
+            on_click=self.animate_and_move_files,
+            width=300,
+            height=40,
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.RED,  # Startfarbe ist Rot
+                color=ft.Colors.WHITE,
+                shape=ft.RoundedRectangleBorder(radius=5),
+                padding=10,
+                elevation=5,
+                text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
+            ),
+            tooltip="Gibt die fertigen Programm aus."
+        )
+
+        # Definiere die Animation für die Hintergrundfarbe.
+        self.export_button.animate_bgcolor = ft.Animation(
+            duration=2500,  # Millisekunden für den Farbübergang
+            curve=ft.AnimationCurve.EASE_IN_OUT
+        )
+
+    #-----------------------------------------ENDE Create ui Elements----------------------------------------
 
     def build_ui(self):
         # UI Layout erstellen
@@ -214,24 +273,22 @@ class BlankMakerApp:
                 self.ctrl_v_field,
                 self.selection_dropdown,
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Rohteil Maße Eingabe
                 ft.Row([
                     ft.Text("Erzeuge Rechteck", size=14, weight=ft.FontWeight.BOLD),
-                    #self.maße_field,
-                    #ft.ElevatedButton("STEP Analyse", on_click=self.load_step_file,
-                                      #tooltip="Sucht nach Eingabe von Programmnamen die STEP-Datei und berechnet Fertigteilgröße und Rohteilgröße.")
                 ]),
 
                 # Rechteck Eingabefelder
                 ft.Row([self.length_field, self.width_field, self.height_field]),
-                ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
+                self.rect_make_button,
+                #ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
                 self.original_size_label,
 
                 ft.Divider(height=10),
 
-                # Kreis Sektion (einklappbar)
+                # Kreis Sektion
                 ft.ExpansionPanelList(
                     elevation=1,  # Ein leichter Schatten für die Optik
                     controls=[
@@ -244,7 +301,8 @@ class BlankMakerApp:
                             content=ft.Container(
                                 content=ft.Column([
                                     ft.Row([self.diameter_field, self.height2_field]),
-                                    ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
+                                    self.circle_make_button,
+                                    #ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
                                 ]),
                                 padding=ft.padding.only(left=15, right=15, bottom=15)  # Etwas Abstand für die Optik
                             ),
@@ -252,8 +310,7 @@ class BlankMakerApp:
                     ]
                 ),
 
-
-                ft.Divider(height=10),
+                #ft.Divider(height=10),
 
                 # Spannmittel Sektion
                 ft.Text("Spannmittel Auswahl:", size=14, weight=ft.FontWeight.BOLD),
@@ -261,7 +318,8 @@ class BlankMakerApp:
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
-                ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
+                self.vice_create_button,
+                #ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
 
 
                 # Button Kombiablauf mit Play-Icon
@@ -285,7 +343,7 @@ class BlankMakerApp:
                     padding=ft.padding.symmetric(vertical=10)
                 ),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # B-Seite
                 ft.Row([
@@ -293,7 +351,7 @@ class BlankMakerApp:
                     ft.ElevatedButton("B-Start", on_click=self.start_bseite)
                 ]),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 #Python Commander aufgeteilt auf links und rechts
                 ft.Row(
@@ -329,29 +387,15 @@ class BlankMakerApp:
                 ),
 
 
+
                 # Button Programm Ausgeben mit Play-Icon in Rot
                 ft.Container(
-                    content=ft.ElevatedButton(
-                        text="PROGRAMM AUSGEBEN",
-                        icon=ft.Icons.SAVE,
-                        on_click=self.move_files,
-                        width=300,
-                        height=40,
-                        style=ft.ButtonStyle(
-                            bgcolor=ft.Colors.RED,  # kräftiges Rot
-                            color=ft.Colors.WHITE,  # weiße Schrift
-                            shape=ft.RoundedRectangleBorder(radius=5),
-                            padding=10,
-                            elevation=5,
-                            text_style=ft.TextStyle(size=16, weight=ft.FontWeight.BOLD)
-                        ),
-                        tooltip="Gibt das fertige Programm aus und kopiert die Daten in die Ablage."
-                    ),
+                    content=self.export_button,  # Wir verwenden die neue Instanzvariable
                     alignment=ft.alignment.center,
                     padding=ft.padding.symmetric(vertical=20)
                 ),
 
-                ft.Divider(height=20),
+                ft.Divider(height=10),
 
                 # Prozess Buttons - grün rot
                 ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
@@ -360,13 +404,14 @@ class BlankMakerApp:
                     content=ft.Row([self.status_icon, self.status_text]),
                     margin=ft.margin.only(top=5)
                 ),
-                ft.Divider(height=20),  # Trennlinie
+
+                ft.Divider(height=10),  # Trennlinie
 
                 # NEU: UI für externe Flet-Anwendung
                 ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
                 ft.Row([
                     self.start_external_flet_button,
-                    # self.stop_external_flet_button
+                    #self.stop_external_flet_button
                 ]),
                 self.external_flet_status_text,
             ],
@@ -374,6 +419,78 @@ class BlankMakerApp:
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
             )
         )
+
+    #-----------------------------------------UI Ende----------------------------------------
+
+    # MAKE button blinken lassen
+    async def animate_button_blink(self, button_to_animate, callback_function, e):
+        """
+        Lässt einen Button 5x grün aufleuchten und ruft danach eine Callback-Funktion auf.
+        """
+        original_color = button_to_animate.bgcolor
+
+        for _ in range(5):
+            button_to_animate.bgcolor = ft.Colors.GREEN_ACCENT_400
+            self.page.update()
+            await asyncio.sleep(0.1)
+
+            button_to_animate.bgcolor = original_color
+            self.page.update()
+            await asyncio.sleep(0.1)
+
+        # Nach der Animation die eigentliche Funktion ausführen
+        callback_function(e)
+
+    async def animate_and_create_circle(self, e):
+        # Ruft unsere allgemeine Blink-Funktion auf
+        await self.animate_button_blink(
+            button_to_animate=self.circle_make_button,
+            callback_function=self.create_circle,
+            e=e
+        )
+
+
+    async def animate_and_create_rect(self, e):
+        # Ruft ebenfalls unsere allgemeine Blink-Funktion auf
+        await self.animate_button_blink(
+            button_to_animate=self.rect_make_button,
+            callback_function=self.create_rect,
+            e=e
+        )
+
+    # Schraubstock erstellen button binken lassen
+    async def animate_and_copy_file(self, e):
+        await self.animate_button_blink(
+            button_to_animate=self.vice_create_button,
+            callback_function=self.copy_file,
+            e=e
+        )
+    #programm ausgeben aufleuchten lassen
+    async def animate_and_move_files(self, e):
+        # 1. Button deaktivieren, um mehrfaches Klicken zu verhindern
+        self.export_button.disabled = True
+        self.page.update()  # KORREKTUR: Kein await und kein _async
+
+        # 2. Farbe zu einem schönen Grün ändern (der Übergang wird animiert)
+        self.export_button.bgcolor = ft.Colors.GREEN_700
+        self.page.update()  # KORREKTUR
+
+        # 3. 5 Sekunden warten, während der Button grün ist
+        await asyncio.sleep(1)
+
+        # 4. Farbe zurück zu Rot ändern (der Übergang wird wieder animiert)
+        self.export_button.bgcolor = ft.Colors.RED
+        self.page.update()  # KORREKTUR
+
+        # 5. Warten, bis die Rück-Animation abgeschlossen ist (wichtig für die Optik)
+        await asyncio.sleep(2,5)  # Muss der Dauer von animate_bgcolor entsprechen
+
+        # 6. Button wieder aktivieren
+        self.export_button.disabled = False
+        self.page.update()  # KORREKTUR
+
+        # 7. Erst jetzt die eigentliche Dateiverschiebung starten
+        self.move_files(e)
 
     # Event Handler Funktionen
     def on_width_change(self, e):
@@ -753,7 +870,6 @@ class BlankMakerApp:
                 break
             await asyncio.sleep(1)  # Prüfe jede Sekunde
 
-
     # NEU: Methoden zum Starten und Stoppen der externen Flet-Anwendung
     def start_external_flet_app(self, e):
         try:
@@ -842,9 +958,6 @@ class BlankMakerApp:
             # Übergebe self.page an start_mausbewegungen
             start_mausbewegungen(self.page, partheight) # NEU: self.page übergeben
 
-            # Optional: Eine kleine Bestätigung im Hauptfenster, dass der Prozess gestartet wurde,
-            # da der eigentliche Dialog erst am Ende von start_mausbewegungen erscheint.
-            # self.show_dialog("Info", "B-Seiten Automatisierung gestartet...")
 
         except ValueError:
             self.show_dialog("Fehler", "Ungültige Eingabe für Fertigteilhöhe. Bitte eine Zahl eingeben.")
