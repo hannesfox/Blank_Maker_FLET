@@ -449,7 +449,7 @@ class BlankMakerApp:
             )
         )
 
-    #-----------------------------------------UI Ende----------------------------------------
+    #-----------------------------------------UI Ende---------------------------------------
 
     # MAKE button blinken lassen
     async def animate_button_blink(self, button_to_animate, callback_function, e):
