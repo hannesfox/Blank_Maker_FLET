@@ -188,8 +188,16 @@ class BlankMakerApp:
         )
         self.rect_make_button = ft.ElevatedButton(
             "MAKE ..",
-            on_click=self.animate_and_create_rect  # WICHTIG: Verweist auf die neue Animations-Methode
+            on_click=self.handle_rect_creation  # WICHTIG: Verweist auf die neue Animations-Methode
         )
+        # NEU: Prozessleiste für das Rechteck
+        self.rect_progress = ft.ProgressBar(
+            width=200,  # Breite der Leiste
+            height=10,
+            visible=False,  # Am Anfang unsichtbar
+            border_radius=5  # Abgerundete Ecken
+        )
+
         # Definiere, DASS und WIE die Hintergrundfarbe animiert werden soll
         self.rect_make_button.animate_bgcolor = ft.Animation(
             duration=150,  # Dauer einer Farbanimation in ms
@@ -198,8 +206,16 @@ class BlankMakerApp:
         # Füge dies zu den anderen UI-Definitionen hinzu
         self.circle_make_button = ft.ElevatedButton(
             "MAKE ..",
-            on_click=self.animate_and_create_circle  # Verweist auf die neue Handler-Methode
+            on_click=self.handle_circle_creation  # Verweist auf die neue Handler-Methode
         )
+        # NEU: Prozessleiste für den Kreis
+        self.circle_progress = ft.ProgressBar(
+            width=200,
+            height=10,
+            visible=False,
+            border_radius=5
+        )
+
         # Auch dieser Button braucht die Animations-Eigenschaft
         self.circle_make_button.animate_bgcolor = ft.Animation(
             duration=150,
@@ -207,13 +223,16 @@ class BlankMakerApp:
         )
         self.vice_create_button = ft.ElevatedButton(
             "Schraubstock erstellen",
-            # Wichtig: Verweist auf den neuen Handler, den wir gleich erstellen
-            on_click=self.animate_and_copy_file
+            # ANPASSUNG: Verweist jetzt auf den neuen Handler
+            on_click=self.handle_vice_creation
         )
-        # Dem Button die Fähigkeit geben, seine Farbe zu animieren
-        self.vice_create_button.animate_bgcolor = ft.Animation(
-            duration=150,
-            curve=ft.AnimationCurve.EASE_IN_OUT
+
+        # NEU: Prozessleiste für den Schraubstock
+        self.vice_progress = ft.ProgressBar(
+            width=200,
+            height=10,
+            visible=False,
+            border_radius=5
         )
 
         #programm ausgeben button aufleuchten lassen
@@ -272,7 +291,18 @@ class BlankMakerApp:
                                     content=ft.Column(
                                         [
                                             ft.Row([self.length_field, self.width_field, self.height_field]),
-                                            self.rect_make_button,
+
+                                            # --- ANPASSUNG HIER ---
+                                            # Button und Prozessleiste in eine Zeile packen
+                                            ft.Row(
+                                                [
+                                                    self.rect_make_button,
+                                                    self.rect_progress,  # Die neue Prozessleiste
+                                                ],
+                                                vertical_alignment=ft.CrossAxisAlignment.CENTER
+                                            ),
+                                            # --- ENDE ANPASSUNG ---
+
                                             self.original_size_label,
                                         ],
                                         alignment=ft.MainAxisAlignment.SPACE_AROUND
@@ -289,7 +319,18 @@ class BlankMakerApp:
                                     content=ft.Column(
                                         [
                                             ft.Row([self.diameter_field, self.height2_field]),
-                                            self.circle_make_button,
+
+                                            # --- ANPASSUNG HIER ---
+                                            # Button und Prozessleiste in eine Zeile packen
+                                            ft.Row(
+                                                [
+                                                    self.circle_make_button,
+                                                    self.circle_progress,  # Die neue Prozessleiste
+                                                ],
+                                                vertical_alignment=ft.CrossAxisAlignment.CENTER
+                                            ),
+                                            # --- ENDE ANPASSUNG ---
+
                                             self.original_size_label,
                                         ],
                                         alignment=ft.MainAxisAlignment.SPACE_AROUND
@@ -312,7 +353,15 @@ class BlankMakerApp:
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
-                self.vice_create_button,
+
+                # Button und Prozessleiste in eine Zeile packen
+                ft.Row(
+                    [
+                        self.vice_create_button,
+                        self.vice_progress,  # Die neue Prozessleiste
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER
+                ),
 
                 ft.Divider(height=20),
 
@@ -451,32 +500,60 @@ class BlankMakerApp:
 
     #-----------------------------------------UI Ende---------------------------------------
 
-    # MAKE button blinken lassen
-    async def animate_button_blink(self, button_to_animate, callback_function, e):
+# MAKE button blinken lassen
+    async def handle_vice_creation(self, e):
+        """Neuer Event-Handler für den Schraubstock-Button."""
+        await self.run_task_with_progress(e, self.vice_create_button, self.vice_progress, self.copy_file)
+
+
+    async def run_task_with_progress(self, e, button: ft.ElevatedButton, progress_bar: ft.ProgressBar,
+                                     task_function):
         """
-        Lässt einen Button 5x grün aufleuchten und ruft danach eine Callback-Funktion auf.
+        Eine allgemeine Funktion, die eine Prozessleiste anzeigt, eine Aufgabe ausführt und die UI aktualisiert.
         """
-        original_color = button_to_animate.bgcolor
+        # 1. Button deaktivieren und Prozessleiste sichtbar machen
+        button.disabled = True
+        progress_bar.visible = True
+        progress_bar.value = None  # None = unbestimmter Ladebalken
+        self.page.update()
 
-        for _ in range(5):
-            button_to_animate.bgcolor = ft.Colors.GREEN_ACCENT_400
+        # 2. Für 2 Sekunden warten (simuliert eine Aufgabe)
+        await asyncio.sleep(2)
+
+        # 3. Die eigentliche Aufgabe ausführen (z.B. Rechteck erstellen)
+        try:
+            task_function(e)
+            # Optional: Kurze Erfolgsanzeige
+            progress_bar.color = ft.Colors.GREEN
+            progress_bar.value = 1  # Voll
             self.page.update()
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.5)
 
-            button_to_animate.bgcolor = original_color
+        except Exception as ex:
+            # Fehlerfall anzeigen
+            progress_bar.color = ft.Colors.RED
+            progress_bar.value = 1  # Voll
             self.page.update()
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(1)  # Fehler kurz sichtbar lassen
+            self.show_dialog("Fehler bei der Ausführung", str(ex))
 
-        # Nach der Animation die eigentliche Funktion ausführen
-        callback_function(e)
+        finally:
+            # 4. UI zurücksetzen: Prozessleiste ausblenden, Button aktivieren
+            progress_bar.visible = False
+            progress_bar.color = None  # Farbe zurücksetzen
+            progress_bar.value = None  # Wert zurücksetzen
+            button.disabled = False
+            self.page.update()
 
-    async def animate_and_create_circle(self, e):
-        # Ruft unsere allgemeine Blink-Funktion auf
-        await self.animate_button_blink(
-            button_to_animate=self.circle_make_button,
-            callback_function=self.create_circle,
-            e=e
-        )
+    async def handle_rect_creation(self, e):
+        """Neuer Event-Handler für den Rechteck-Button."""
+        await self.run_task_with_progress(e, self.rect_make_button, self.rect_progress, self.create_rect)
+
+    async def handle_circle_creation(self, e):
+        """Neuer Event-Handler für den Kreis-Button."""
+        await self.run_task_with_progress(e, self.circle_make_button, self.circle_progress, self.create_circle)
+
+        #############################################################
 
 
     async def animate_and_create_rect(self, e):
