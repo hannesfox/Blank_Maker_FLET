@@ -248,64 +248,79 @@ class BlankMakerApp:
         self.page.add(
             ft.Column([
                 # Programmname Sektion
-                ft.Text("Programmname:", size=14, weight=ft.FontWeight.BOLD),
+                ft.Text("Programmname:", size=16, weight=ft.FontWeight.BOLD),
                 self.ctrl_v_field,
                 self.selection_dropdown,
 
-                ft.Divider(height=10),
+                ft.Divider(height=40),
 
-                # Rohteil Maße Eingabe
-                ft.Row([
-                    ft.Text("Erzeuge Rechteck", size=14, weight=ft.FontWeight.BOLD),
-                ]),
 
-                # Rechteck Eingabefelder
-                ft.Row([self.length_field, self.width_field, self.height_field]),
-                self.rect_make_button,
-                #ft.ElevatedButton("MAKE ..", on_click=self.create_rect),
-                self.original_size_label,
+                ft.Text("Rohteil Erstellung:", size=16, weight=ft.FontWeight.BOLD),
 
-                ft.Divider(height=10),
-
-                # Kreis Sektion
-                ft.ExpansionPanelList(
-                    elevation=1,  # Ein leichter Schatten für die Optik
-                    controls=[
-                        ft.ExpansionPanel(
-                            # Das ist die Kopfzeile, die immer sichtbar ist
-                            header=ft.ListTile(
-                                title=ft.Text("Erzeuge Kreis", weight=ft.FontWeight.BOLD),
+                # tabs
+                ft.Container(
+                    height=220,
+                    content=ft.Tabs(
+                        selected_index=0,
+                        animation_duration=500,
+                        tabs=[
+                            # Tab 1: Rechteck erstellen
+                            ft.Tab(
+                                text="Rechteck",
+                                icon=ft.Icons.RECTANGLE,
+                                content=ft.Container(
+                                    content=ft.Column(
+                                        [
+                                            ft.Row([self.length_field, self.width_field, self.height_field]),
+                                            self.rect_make_button,
+                                            self.original_size_label,
+                                        ],
+                                        alignment=ft.MainAxisAlignment.SPACE_AROUND
+                                    ),
+                                    padding=ft.padding.symmetric(horizontal=5),
+                                )
                             ),
-                            # Das ist der Inhalt, der ein- und ausgeklappt wird
-                            content=ft.Container(
-                                content=ft.Column([
-                                    ft.Row([self.diameter_field, self.height2_field]),
-                                    self.circle_make_button,
-                                    #ft.ElevatedButton("MAKE ..", on_click=self.create_circle),
-                                ]),
-                                padding=ft.padding.only(left=15, right=15, bottom=15)  # Etwas Abstand für die Optik
+
+                            # Tab 2: Kreis erstellen
+                            ft.Tab(
+                                text="Kreis",
+                                icon=ft.Icons.CIRCLE_OUTLINED,
+                                content=ft.Container(
+                                    content=ft.Column(
+                                        [
+                                            ft.Row([self.diameter_field, self.height2_field]),
+                                            self.circle_make_button,
+                                            self.original_size_label,
+                                        ],
+                                        alignment=ft.MainAxisAlignment.SPACE_AROUND
+                                    ),
+                                    padding=ft.padding.symmetric(horizontal=5),
+                                )
                             ),
-                        )
-                    ]
+                        ],
+                        expand=True,
+                    ),
+                    # Rahmen
+                    border=ft.border.all(2, ft.Colors.GREY_300),
+                    border_radius=ft.border_radius.all(8),
+                    padding=5,
                 ),
 
-                #ft.Divider(height=10),
-
                 # Spannmittel Sektion
-                ft.Text("Spannmittel Auswahl:", size=14, weight=ft.FontWeight.BOLD),
+                ft.Text("Spannmittel Auswahl:", size=16, weight=ft.FontWeight.BOLD),
                 self.value_field,
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
                 self.vice_create_button,
-                #ft.ElevatedButton("Schraubstock erstellen", on_click=self.copy_file),
 
+                ft.Divider(height=20),
 
                 # Button Kombiablauf mit Play-Icon
                 ft.Container(
                     content=ft.ElevatedButton(
                         text="Kombiablauf Starten",
-                        icon=ft.Icons.PLAY_CIRCLE_FILL,  # icon
+                        icon=ft.Icons.AUTO_FIX_HIGH_OUTLINED,  # icon
                         on_click=self.start_kombiablauf,
                         width=300,
                         height=40,
@@ -327,12 +342,12 @@ class BlankMakerApp:
                 # B-Seite
                 ft.Row([
                     self.blength_field,
-                    ft.ElevatedButton("B-Start", on_click=self.start_bseite)
+                    ft.ElevatedButton("   B-Start   ", on_click=self.start_bseite)
                 ]),
 
                 ft.Divider(height=10),
 
-                #Python Commander aufgeteilt auf links und rechts
+                # Python Commander aufgeteilt auf links und rechts
                 ft.Row(
                     controls=[
                         # Linke Spalte: Python Commander
@@ -341,7 +356,7 @@ class BlankMakerApp:
                                 ft.Text("PythonCommander:", size=12, weight=ft.FontWeight.BOLD),
                                 ft.Row([
                                     self.at_prefix_field,
-                                    ft.ElevatedButton("switch reloaded", on_click=self.toggle_value)
+                                    ft.ElevatedButton("     Switch    ", on_click=self.toggle_value)
                                 ]),
                                 ft.Row([
                                     self.project_name_field,
@@ -365,8 +380,6 @@ class BlankMakerApp:
                     ]
                 ),
 
-
-
                 # Button Programm Ausgeben mit Play-Icon in Rot
                 ft.Container(
                     content=self.export_button,  # Wir verwenden die neue Instanzvariable
@@ -376,23 +389,60 @@ class BlankMakerApp:
 
                 ft.Divider(height=10),
 
-                # Prozess Buttons - grün rot
-                ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row([self.start_button, self.stop_button]),
-                ft.Container(
-                    content=ft.Row([self.status_icon, self.status_text]),
-                    margin=ft.margin.only(top=5)
+                ft.Row(
+                    controls=[
+                        # Linke Spalte
+                        ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
+                                    ft.Row(
+                                        [self.start_button, self.stop_button],
+                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
+                                    ),
+                                    ft.Row(
+                                        [self.status_icon, self.status_text],
+                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
+                                    ),
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            ),
+                            expand=True,  # Nimmt 50% der Breite ein
+                            padding=10,
+                            border=ft.border.all(1, ft.Colors.GREY_300),
+                            border_radius=ft.border_radius.all(8),
+                        ),
+
+                        # Vertikale Trennlinie für eine saubere Optik
+                        ft.VerticalDivider(width=10, thickness=1),
+
+                        # Rechte Spalte: Externe Flet App
+                        ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD,
+                                            text_align=ft.TextAlign.CENTER),
+                                    ft.Row(
+                                        [
+                                            self.start_external_flet_button,
+                                        ],
+                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
+                                    ),
+                                    ft.Row(
+                                        [self.external_flet_status_text],
+                                        alignment=ft.MainAxisAlignment.CENTER
+                                    ),
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            ),
+                            expand=True,
+                            padding=10,
+                            border=ft.border.all(1, ft.Colors.GREY_300),
+                            border_radius=ft.border_radius.all(8),
+                        ),
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
-
-                ft.Divider(height=10),  # Trennlinie
-
-                # NEU: UI für externe Flet-Anwendung
-                ft.Text("Externe Flet Anwendung (ProzessOCR):", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row([
-                    self.start_external_flet_button,
-                    #self.stop_external_flet_button
-                ]),
-                self.external_flet_status_text,
             ],
                 scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
                 expand=True,  # Column soll verfügbaren Platz ausfüllen
