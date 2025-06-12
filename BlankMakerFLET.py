@@ -278,10 +278,10 @@ class BlankMakerApp:
 
                 # tabs
                 ft.Container(
-                    height=220,
+                    height=250,
                     content=ft.Tabs(
                         selected_index=0,
-                        animation_duration=500,
+                        animation_duration=2000,
                         tabs=[
                             # Tab 1: Rechteck erstellen
                             ft.Tab(
