@@ -9,7 +9,7 @@
 
 # Autor: [Gschwendtner Johannes]
 # Datum: [30.05.2025]
-# Version: [9.1 - Flet Version]
+# Version: [9.5 - Flet Version]
 
 import flet as ft
 from program1 import create_rectangle
@@ -1133,6 +1133,8 @@ def main(page: ft.Page):
     #page.window.center()
 
     page.theme_mode = ft.ThemeMode.LIGHT
+    #page.theme_mode = ft.ThemeMode.DARK
+    #page.bgcolor = "#37474F"
     app = BlankMakerApp(page)
 
 
