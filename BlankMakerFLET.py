@@ -29,6 +29,7 @@ import asyncio
 from pathlib import Path
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
+import actions
 
 
 # Pfade zum Ändern mit pathlib
@@ -713,84 +714,31 @@ class BlankMakerApp:
 
     def execute_actions(self, e):
         try:
-            self.action_1()
-            self.action_2()
-            self.action_3()
-            self.action_4()
-            self.action_5()
-            self.action_6()
-            self.action_7()
+            # 1. Sammle alle benötigten Daten aus der UI, bevor die Aktionen starten
+            program_name = self.ctrl_v_field.value
+            machine_type = self.selection_dropdown.value
+            destination_folder = self.destination_field.value
+
+            # Optional: Prüfen, ob die Felder ausgefüllt sind
+            if not program_name or not machine_type:
+                self.show_dialog("Eingabe fehlt", "Bitte Programmnamen und Maschinenart angeben.")
+                return
+
+            # 2. Rufe die Funktionen aus dem 'actions' Modul auf
+            # Beachte: actions.funktionsname()
+            # Und wir übergeben die gesammelten Daten als Parameter
+            actions.action_1()
+            actions.action_2()
+            actions.action_3(program_name)
+            actions.action_4(program_name)
+            actions.action_5(machine_type)
+            actions.action_6()
+            actions.action_7(destination_folder)
+
         except Exception as e:
+            # Der try...except Block fängt jetzt die Fehler, die in actions.py auftreten
             self.show_dialog("Fehler", f"Fehler beim Ausführen der Aktionen: {e}")
 
-    def action_1(self):
-        image_position = pyscreeze.locateOnScreen('Bilder/1.png', confidence=0.5)
-        image_center = pyscreeze.center(image_position)
-        time.sleep(0.5)
-        pyautogui.click(image_center)
-        time.sleep(0.5)
-
-    def action_2(self):
-        image_position = pyscreeze.locateOnScreen('Bilder/2.png', confidence=0.4)
-        image_center = pyscreeze.center(image_position)
-        time.sleep(0.9)
-        pyautogui.click(image_center)
-
-    def action_3(self):
-        image_position = pyscreeze.locateOnScreen('Bilder/3.png', confidence=0.5, grayscale=True)
-        image_center = pyscreeze.center(image_position)
-        time.sleep(0.4)
-        pyautogui.doubleClick(image_center)
-        time.sleep(0.2)
-        pyautogui.press('delete')
-        time.sleep(0.1)
-        text = self.ctrl_v_field.value + '_A'
-        pyautogui.typewrite(text)
-        time.sleep(0.1)
-
-    def action_4(self):
-        pyautogui.press('tab')
-        pyautogui.press('tab')
-        time.sleep(0.1)
-        pyautogui.press('delete')
-        time.sleep(0.1)
-        text = self.ctrl_v_field.value
-        pyautogui.typewrite(text)
-        time.sleep(0.1)
-
-    def action_5(self):
-        pyautogui.press('tab')
-        time.sleep(0.1)
-        pyautogui.hotkey('ctrl', 'a')
-        pyautogui.press('delete')
-        time.sleep(0.1)
-        text = self.selection_dropdown.value
-        pyautogui.typewrite(text)
-        time.sleep(0.1)
-
-    def action_6(self):
-        pyautogui.press('enter')
-        time.sleep(0.1)
-
-    def action_7(self):
-        wegzeit1 = 0.4
-        pfad_rohteil = os.path.join(self.destination_field.value, "!rohteil.dxf")
-        pfad_schraubstock = os.path.join(self.destination_field.value, "!schraubstock.step")
-        pyautogui.doubleClick(974, 1047, duration=wegzeit1)
-        time.sleep(0.5)
-        pyautogui.hotkey('ctrl', 'o')
-        time.sleep(0.5)
-        pyautogui.typewrite(pfad_rohteil)
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        time.sleep(0.5)
-        pyautogui.doubleClick(977, 1142, duration=wegzeit1)
-        time.sleep(0.5)
-        pyautogui.hotkey('ctrl', 'o')
-        time.sleep(0.8)
-        pyautogui.typewrite(pfad_schraubstock)
-        time.sleep(0.8)
-        pyautogui.press('enter')
 
     def move_files(self, e):
         at_prefix = self.at_prefix_field.value
