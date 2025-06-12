@@ -30,14 +30,6 @@ from pathlib import Path
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
 
-# Pfade zum Ändern alt
-# base_path1 = "C:\\Users\\Gschwendtner\\Desktop\\Spannmittel\\"  # Pfad für Spannmittelordner
-# base_path2 = "K:\\NC-PGM\\"  # NC-PGM Ausgabeordner Esprit
-# base_path3 = "WKS05"  # Auswahl von WKS Ordner
-# # base_path4 wird in init belegt
-# base_path5 = "C:\\Users\\Gschwendtner\\PycharmProjects\\Blank_Maker_FLET\\prozess.pyw"
-# # pfad für flet CRC App
-# PATH_TO_EXTERNAL_FLET_APP = r"C:\Users\Gschwendtner\PycharmProjects\ProzessORC\Flet-ProzessOCR-1.0.py"
 
 # Pfade zum Ändern mit pathlib
 base_path1 = Path(r"C:\Users\Gschwendtner\Desktop\Spannmittel")  # Pfad für Spannmittelordner
@@ -72,8 +64,6 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        #alt
-        #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
         #pathlib neu
         self.base_path4 = Path(f"K:/Esprit/NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}")
 
@@ -553,24 +543,24 @@ class BlankMakerApp:
         """Neuer Event-Handler für den Kreis-Button."""
         await self.run_task_with_progress(e, self.circle_make_button, self.circle_progress, self.create_circle)
 
-        #############################################################
 
 
-    async def animate_and_create_rect(self, e):
-        # Ruft ebenfalls unsere allgemeine Blink-Funktion auf
-        await self.animate_button_blink(
-            button_to_animate=self.rect_make_button,
-            callback_function=self.create_rect,
-            e=e
-        )
 
-    # Schraubstock erstellen button binken lassen
-    async def animate_and_copy_file(self, e):
-        await self.animate_button_blink(
-            button_to_animate=self.vice_create_button,
-            callback_function=self.copy_file,
-            e=e
-        )
+    # async def animate_and_create_rect(self, e):
+    #     # Ruft ebenfalls unsere allgemeine Blink-Funktion auf
+    #     await self.animate_button_blink(
+    #         button_to_animate=self.rect_make_button,
+    #         callback_function=self.create_rect,
+    #         e=e
+    #     )
+    #
+    # # Schraubstock erstellen button binken lassen
+    # async def animate_and_copy_file(self, e):
+    #     await self.animate_button_blink(
+    #         button_to_animate=self.vice_create_button,
+    #         callback_function=self.copy_file,
+    #         e=e
+    #     )
     #programm ausgeben aufleuchten lassen
     async def animate_and_move_files(self, e):
         # 1. Button deaktivieren, um mehrfaches Klicken zu verhindern
@@ -611,6 +601,7 @@ class BlankMakerApp:
             self.at_prefix_field.value = "25"
         self.page.update()
 
+    #Kombiablauf Funktion
     def start_kombiablauf(self, e):
         # Übergebe self.page und die Flet-Steuerelemente
         kombi = Kombiablauf(self.page, # Hinzugefügt: Die Flet Page Instanz
