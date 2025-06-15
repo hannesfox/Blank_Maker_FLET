@@ -9,7 +9,7 @@
 
 # Autor: [Gschwendtner Johannes]
 # Datum: [30.05.2025]
-# Version: [9.1 - Flet Version]
+# Version: [9.5 - Flet Version mit neuem Design]
 
 import flet as ft
 from program1 import create_rectangle
@@ -29,6 +29,7 @@ import asyncio
 from pathlib import Path
 from rohteilrechner import process_step_file
 from kombiablauf import Kombiablauf
+import actions
 
 # ==============================================================================
 #  KONFIGURATION: PFADE FÜR WINDOWS & MAC
@@ -72,7 +73,6 @@ class BlankMakerApp:
         super().__init__()
         self.page = page
 
-
         current_date = datetime.datetime.now()
         kalenderwoche = int(current_date.strftime("%V"))
         wochentag_num_python = current_date.weekday()
@@ -92,11 +92,9 @@ class BlankMakerApp:
         }
         wochentag_kuerzel = deutsche_wochentage_kurz[wochentag_num_python]
 
-        #Windoof
-        #self.base_path4 = f"K:\\Esprit\\NC-Files\\AT-25-KW{kalenderwoche}\\Gschwendtner\\{wochentag_ordner_num}.{wochentag_kuerzel}"
-        #pathlib neu
-        # Pfad für Wochentagspeicherort
-        self.base_path4 = esprit_base_path / f"NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}"
+        # pathlib neu
+        self.base_path4 = Path(
+            f"K:/Esprit/NC-Files/AT-25-KW{kalenderwoche}/Gschwendtner/{wochentag_ordner_num}.{wochentag_kuerzel}")
 
         self.history = []  # Für Zurück-Button
         self.updating = False  # Flag zur Vermeidung von rekursiven Aufrufen
@@ -112,34 +110,143 @@ class BlankMakerApp:
         self.build_ui()
         self.check_dxf_files()
 
-
     def create_ui_elements(self):
         # Eingabefelder
-        self.length_field = ft.TextField(label="X Länge:", width=150, on_change=self.update_folder_selection)
-        self.width_field = ft.TextField(label="Y Breite:", width=150, on_change=self.on_width_change)
-        self.height_field = ft.TextField(label="Z Höhe:", width=150)
-        self.diameter_field = ft.TextField(label="Durchmesser:", width=150)
-        self.height2_field = ft.TextField(label="Höhe:", width=150)
-        self.value_field = ft.TextField(label="Wert in mm:", width=300)
-        self.ctrl_v_field = ft.TextField(label="Text für CTRL+V eingeben:", width=300)
-        self.at_prefix_field = ft.TextField(label="AT-..", value="25", width=80)
+
+        self.length_field = ft.TextField(label="X Länge:", width=150, on_change=self.update_folder_selection,
+                                         # Diese Eigenschaften hinzufügen:
+                                         filled=True,
+                                         bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                         border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                         border_radius=5,  # Runde Ecken
+                                         border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                         focused_border_color="#05cfea",
+                                         )
+
+        self.width_field = ft.TextField(label="Y Breite:", width=150, on_change=self.on_width_change,
+                                        # Diese Eigenschaften hinzufügen:
+                                        filled=True,
+                                        bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                        border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                        border_radius=5,  # Runde Ecken
+                                        border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                        focused_border_color="#05cfea",
+                                        )
+        self.height_field = ft.TextField(label="Z Höhe:", width=150,
+                                         # Diese Eigenschaften hinzufügen:
+                                         filled=True,
+                                         bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                         border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                         border_radius=5,  # Runde Ecken
+                                         border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                         focused_border_color="#05cfea",
+                                         )
+
+        self.diameter_field = ft.TextField(label="Durchmesser:", width=150,
+                                           # Diese Eigenschaften hinzufügen:
+                                           filled=True,
+                                           bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                           border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                           border_radius=5,  # Runde Ecken
+                                           border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                           focused_border_color="#05cfea",
+                                           )
+        self.height2_field = ft.TextField(label="Höhe:", width=150,
+                                          # Diese Eigenschaften hinzufügen:
+                                          filled=True,
+                                          bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                          border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                          border_radius=5,  # Runde Ecken
+                                          border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                          focused_border_color="#05cfea",
+                                          )
+        self.value_field = ft.TextField(label="Wert in mm:", width=300,
+                                        # Diese Eigenschaften hinzufügen:
+                                        filled=True,
+                                        bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                        border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                        border_radius=5,  # Runde Ecken
+                                        border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                        focused_border_color="#05cfea",
+                                        )
+        self.ctrl_v_field = ft.TextField(label="Text für CTRL+V eingeben:", width=300,
+                                         # Diese Eigenschaften hinzufügen:
+                                         filled=True,
+                                         bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                         border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                         border_radius=5,  # Runde Ecken
+                                         border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                         focused_border_color="#05cfea",
+                                         )
+        self.at_prefix_field = ft.TextField(label="AT-..", value="25", width=100,
+                                            # Diese Eigenschaften hinzufügen:
+                                            filled=True,
+                                            bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                            border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                            border_radius=5,  # Runde Ecken
+                                            border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                            focused_border_color="#05cfea",
+                                            )
         self.project_name_field = ft.TextField(label="Projektname: zB.0815", width=200, max_length=4,
-                                               on_change=self.on_entry_change)
-        self.destination_field = ft.TextField(label="Zielordner:", width=500, value=self.base_path4)
-        self.blength_field = ft.TextField(label="Fertigteilhöhe:", width=150)
+                                               on_change=self.on_entry_change,
+                                               # Diese Eigenschaften hinzufügen:
+                                               filled=True,
+                                               bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                               border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                               border_radius=5,  # Runde Ecken
+                                               border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                               focused_border_color="#05cfea",
+                                               )
+        self.destination_field = ft.TextField(label="Zielordner:", width=500, value=str(self.base_path4),
+                                              # Diese Eigenschaften hinzufügen:
+                                              filled=True,
+                                              bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                              border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                              border_radius=5,  # Runde Ecken
+                                              border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                              focused_border_color="#05cfea",
+                                              )
+        self.blength_field = ft.TextField(label="Fertigteilhöhe:", width=150,
+                                          # Diese Eigenschaften hinzufügen:
+                                          filled=True,
+                                          bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                          border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                          border_radius=5,  # Runde Ecken
+                                          border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                          focused_border_color="#05cfea",
+                                          )
         self.maße_field = ft.TextField(label="Rohteil Maße (L*B*H):", width=300,
-                                       on_change=self.update_dimensions_from_input)
+                                       on_change=self.update_dimensions_from_input,
+                                       # Diese Eigenschaften hinzufügen:
+                                       filled=True,
+                                       bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.WHITE),
+                                       border=ft.InputBorder.OUTLINE,  # Erzeugt den Kasten
+                                       border_radius=5,  # Runde Ecken
+                                       border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+                                       focused_border_color="#05cfea",
+                                       )
 
         # Dropdown-Menüs
         self.folder_dropdown = ft.Dropdown(
             label="Ordner auswählen:",
             width=300,
-            options=[]
+            options=[],
+            filled=True,
+            bgcolor=ft.Colors.GREY_800,
+            border=ft.InputBorder.OUTLINE,
+            border_radius=5,
+            border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+            focused_border_color="#05cfea",
         )
 
         self.selection_dropdown = ft.Dropdown(
-            label="Maschienenart:",
-            width=300,
+            label="Maschinenart:",
+            width=300, filled=True,
+            bgcolor=ft.Colors.GREY_800,
+            border=ft.InputBorder.OUTLINE,
+            border_radius=5,
+            border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
+            focused_border_color="#05cfea",
             value="Option",
             options=[
                 ft.dropdown.Option('5 Achs  3 Achs'),
@@ -154,16 +261,16 @@ class BlankMakerApp:
         # Buttons
         self.back_button = ft.ElevatedButton("Zurück", on_click=self.go_back, disabled=True)
 
-        # Status Labels - Fixed deprecated color usage
-        self.status_label = ft.Text("", size=15, color=ft.Colors.GREEN)
-        self.status_label1 = ft.Text("", size=15, color=ft.Colors.BLUE)
+        # Status Labels
+        self.status_label = ft.Text("", size=15)  # Farbe wird dynamisch gesetzt
+        self.status_label1 = ft.Text("", size=15, color="primary")  # Nutzt die Primärfarbe des Themes
         self.original_size_label = ft.Text("", size=8)
 
         # Prozess Öffnen button
         self.start_button = ft.ElevatedButton(
             "Prozess Start",
             on_click=self.run_python_script,
-            bgcolor=ft.Colors.GREEN,
+            bgcolor=ft.Colors.GREEN_700,
             color=ft.Colors.WHITE,
             disabled=False
         )
@@ -171,82 +278,97 @@ class BlankMakerApp:
         self.stop_button = ft.ElevatedButton(
             "Prozess Stop",
             on_click=self.kill_python_script,
-            bgcolor=ft.Colors.RED,
+            bgcolor=ft.Colors.RED_700,
             color=ft.Colors.WHITE,
             disabled=True
         )
 
         self.status_icon = ft.Icon(
             ft.Icons.CIRCLE,
-            color=ft.Colors.RED,
+            color=ft.Colors.RED_600,
             size=25
         )
 
         self.status_text = ft.Text(
             "Gestoppt",
             size=12,
-            color=ft.Colors.RED
+            color=ft.Colors.RED_600
         )
 
-        # NEU: Buttons und Status für die externe Flet-Anwendung
+        # Buttons und Status für die externe Flet-Anwendung
         self.start_external_flet_button = ft.ElevatedButton(
             "Externe Flet App STARTEN",
             on_click=self.start_external_flet_app,
-            bgcolor=ft.Colors.GREEN_ACCENT_700,
+            bgcolor=ft.Colors.GREEN_800,
             color=ft.Colors.WHITE,
         )
         self.stop_external_flet_button = ft.ElevatedButton(
             "Externe Flet App STOPPEN",
             on_click=self.stop_external_flet_app,
-            bgcolor=ft.Colors.RED_ACCENT_700,
+            bgcolor=ft.Colors.RED_800,
             color=ft.Colors.WHITE,
-            disabled=True  # Am Anfang ist nichts zu stoppen
+            disabled=True
         )
         self.external_flet_status_text = ft.Text(
             "Externe Flet App: Gestoppt",
             size=12,
-            color=ft.Colors.GREY
+            color="onsurfacevariant"  # Theme-abhängige graue Farbe
         )
         self.rect_make_button = ft.ElevatedButton(
-            "   MAKE ..   ",
-            on_click=self.animate_and_create_rect  # WICHTIG: Verweist auf die neue Animations-Methode
+            "MAKE ..",
+            on_click=self.handle_rect_creation
         )
-        # Definiere, DASS und WIE die Hintergrundfarbe animiert werden soll
+        # Prozessleiste für das Rechteck
+        self.rect_progress = ft.ProgressBar(
+            width=200,
+            height=10,
+            visible=False,
+            border_radius=5
+        )
+
         self.rect_make_button.animate_bgcolor = ft.Animation(
-            duration=150,  # Dauer einer Farbanimation in ms
+            duration=150,
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
-        # Füge dies zu den anderen UI-Definitionen hinzu
+
         self.circle_make_button = ft.ElevatedButton(
-            "   MAKE ..   ",
-            on_click=self.animate_and_create_circle  # Verweist auf die neue Handler-Methode
+            "MAKE ..",
+            on_click=self.handle_circle_creation
         )
-        # Auch dieser Button braucht die Animations-Eigenschaft
+        # Prozessleiste für den Kreis
+        self.circle_progress = ft.ProgressBar(
+            width=200,
+            height=10,
+            visible=False,
+            border_radius=5
+        )
+
         self.circle_make_button.animate_bgcolor = ft.Animation(
             duration=150,
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
         self.vice_create_button = ft.ElevatedButton(
-            "   Schraubstock erstellen   ",
-            # Wichtig: Verweist auf den neuen Handler, den wir gleich erstellen
-            on_click=self.animate_and_copy_file
-        )
-        # Dem Button die Fähigkeit geben, seine Farbe zu animieren
-        self.vice_create_button.animate_bgcolor = ft.Animation(
-            duration=150,
-            curve=ft.AnimationCurve.EASE_IN_OUT
+            "Schraubstock erstellen",
+            on_click=self.handle_vice_creation
         )
 
-        #programm ausgeben button aufleuchten lassen
+        # Prozessleiste für den Schraubstock
+        self.vice_progress = ft.ProgressBar(
+            width=200,
+            height=10,
+            visible=False,
+            border_radius=5
+        )
+
+        # programm ausgeben button
         self.export_button = ft.ElevatedButton(
             text="PROGRAMM AUSGEBEN",
             icon=ft.Icons.SAVE,
-            # Wichtig: Verweist auf die neue Animations-Methode
             on_click=self.animate_and_move_files,
             width=300,
             height=40,
             style=ft.ButtonStyle(
-                bgcolor=ft.Colors.RED,  # Startfarbe ist Rot
+                bgcolor=ft.Colors.RED_600,
                 color=ft.Colors.WHITE,
                 shape=ft.RoundedRectangleBorder(radius=5),
                 padding=10,
@@ -256,13 +378,12 @@ class BlankMakerApp:
             tooltip="Gibt die fertigen Programm aus."
         )
 
-        # Definiere die Animation für die Hintergrundfarbe.
         self.export_button.animate_bgcolor = ft.Animation(
-            duration=2500,  # Millisekunden für den Farbübergang
+            duration=2500,
             curve=ft.AnimationCurve.EASE_IN_OUT
         )
 
-    #-----------------------------------------ENDE Create ui Elements----------------------------------------
+    # -----------------------------------------ENDE Create ui Elements----------------------------------------
 
     def build_ui(self):
         # UI Layout erstellen
@@ -275,15 +396,14 @@ class BlankMakerApp:
 
                 ft.Divider(height=40),
 
-
                 ft.Text("Rohteil Erstellung:", size=16, weight=ft.FontWeight.BOLD),
 
                 # tabs
                 ft.Container(
-                    height=220,
+                    height=250,
                     content=ft.Tabs(
                         selected_index=0,
-                        animation_duration=500,
+                        animation_duration=2000,
                         tabs=[
                             # Tab 1: Rechteck erstellen
                             ft.Tab(
@@ -293,7 +413,13 @@ class BlankMakerApp:
                                     content=ft.Column(
                                         [
                                             ft.Row([self.length_field, self.width_field, self.height_field]),
-                                            self.rect_make_button,
+                                            ft.Row(
+                                                [
+                                                    self.rect_make_button,
+                                                    self.rect_progress,
+                                                ],
+                                                vertical_alignment=ft.CrossAxisAlignment.CENTER
+                                            ),
                                             self.original_size_label,
                                         ],
                                         alignment=ft.MainAxisAlignment.SPACE_AROUND
@@ -310,7 +436,13 @@ class BlankMakerApp:
                                     content=ft.Column(
                                         [
                                             ft.Row([self.diameter_field, self.height2_field]),
-                                            self.circle_make_button,
+                                            ft.Row(
+                                                [
+                                                    self.circle_make_button,
+                                                    self.circle_progress,
+                                                ],
+                                                vertical_alignment=ft.CrossAxisAlignment.CENTER
+                                            ),
                                             self.original_size_label,
                                         ],
                                         alignment=ft.MainAxisAlignment.SPACE_AROUND
@@ -321,8 +453,8 @@ class BlankMakerApp:
                         ],
                         expand=True,
                     ),
-                    # Rahmen
-                    border=ft.border.all(2, ft.Colors.GREY_300),
+                    # Rahmen nutzt jetzt Theme-Farbe
+                    border=ft.border.all(2, "outlinevariant"),
                     border_radius=ft.border_radius.all(8),
                     padding=5,
                 ),
@@ -333,7 +465,15 @@ class BlankMakerApp:
                 self.folder_dropdown,
                 ft.Text("Zielordner:"),
                 self.destination_field,
-                self.vice_create_button,
+
+                # Button und Prozessleiste in eine Zeile packen
+                ft.Row(
+                    [
+                        self.vice_create_button,
+                        self.vice_progress,
+                    ],
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER
+                ),
 
                 ft.Divider(height=20),
 
@@ -341,13 +481,14 @@ class BlankMakerApp:
                 ft.Container(
                     content=ft.ElevatedButton(
                         text="Kombiablauf Starten",
-                        icon=ft.Icons.AUTO_FIX_HIGH_OUTLINED,  # icon
+                        icon=ft.Icons.AUTO_FIX_HIGH_OUTLINED,
                         on_click=self.start_kombiablauf,
                         width=300,
                         height=40,
                         style=ft.ButtonStyle(
-                            bgcolor="#ADD8E6",  # Pastellgrün
-                            color=ft.Colors.BLACK,
+                            # Nutzt jetzt die Theme-Farben für einen passenden Look
+                            bgcolor="primaryContainer",
+                            color="onPrimaryContainer",
                             shape=ft.RoundedRectangleBorder(radius=5),
                             padding=10,
                             elevation=5
@@ -401,9 +542,9 @@ class BlankMakerApp:
                     ]
                 ),
 
-                # Button Programm Ausgeben mit Play-Icon in Rot
+                # Button Programm Ausgeben
                 ft.Container(
-                    content=self.export_button,  # Wir verwenden die neue Instanzvariable
+                    content=self.export_button,
                     alignment=ft.alignment.center,
                     padding=ft.padding.symmetric(vertical=20)
                 ),
@@ -419,22 +560,22 @@ class BlankMakerApp:
                                     ft.Text("Prozess Öffnen:", size=12, weight=ft.FontWeight.BOLD),
                                     ft.Row(
                                         [self.start_button, self.stop_button],
-                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
+                                        alignment=ft.MainAxisAlignment.CENTER
                                     ),
                                     ft.Row(
                                         [self.status_icon, self.status_text],
-                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
+                                        alignment=ft.MainAxisAlignment.CENTER
                                     ),
                                 ],
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             ),
-                            expand=True,  # Nimmt 50% der Breite ein
+                            expand=True,
                             padding=10,
-                            border=ft.border.all(1, ft.Colors.GREY_300),
+                            border=ft.border.all(1, "outlinevariant"),
                             border_radius=ft.border_radius.all(8),
                         ),
 
-                        # Vertikale Trennlinie für eine saubere Optik
+                        # Vertikale Trennlinie
                         ft.VerticalDivider(width=10, thickness=1),
 
                         # Rechte Spalte: Externe Flet App
@@ -447,7 +588,7 @@ class BlankMakerApp:
                                         [
                                             self.start_external_flet_button,
                                         ],
-                                        alignment=ft.MainAxisAlignment.CENTER  # Zentriert
+                                        alignment=ft.MainAxisAlignment.CENTER
                                     ),
                                     ft.Row(
                                         [self.external_flet_status_text],
@@ -458,89 +599,84 @@ class BlankMakerApp:
                             ),
                             expand=True,
                             padding=10,
-                            border=ft.border.all(1, ft.Colors.GREY_300),
+                            border=ft.border.all(1, "outlinevariant"),
                             border_radius=ft.border_radius.all(8),
                         ),
                     ],
                     vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
             ],
-                scroll=ft.ScrollMode.ADAPTIVE,  # Besseres Scroll
-                expand=True,  # Column soll verfügbaren Platz ausfüllen
+                scroll=ft.ScrollMode.ADAPTIVE,
+                expand=True,
             )
         )
 
-    #-----------------------------------------UI Ende----------------------------------------
+    # -----------------------------------------UI Ende---------------------------------------
 
-    # MAKE button blinken lassen
-    async def animate_button_blink(self, button_to_animate, callback_function, e):
+    async def handle_vice_creation(self, e):
+        """Neuer Event-Handler für den Schraubstock-Button."""
+        await self.run_task_with_progress(e, self.vice_create_button, self.vice_progress, self.copy_file)
+
+    async def run_task_with_progress(self, e, button: ft.ElevatedButton, progress_bar: ft.ProgressBar,
+                                     task_function):
         """
-        Lässt einen Button 5x grün aufleuchten und ruft danach eine Callback-Funktion auf.
+        Eine allgemeine Funktion, die eine Prozessleiste anzeigt, eine Aufgabe ausführt und die UI aktualisiert.
         """
-        original_color = button_to_animate.bgcolor
+        button.disabled = True
+        progress_bar.visible = True
+        progress_bar.value = None
+        self.page.update()
 
-        for _ in range(5):
-            button_to_animate.bgcolor = ft.Colors.GREEN_ACCENT_400
+        await asyncio.sleep(2)
+
+        try:
+            task_function(e)
+            progress_bar.color = ft.Colors.GREEN
+            progress_bar.value = 1
             self.page.update()
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.5)
 
-            button_to_animate.bgcolor = original_color
+        except Exception as ex:
+            progress_bar.color = ft.Colors.RED
+            progress_bar.value = 1
             self.page.update()
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(1)
+            self.show_dialog("Fehler bei der Ausführung", str(ex))
 
-        # Nach der Animation die eigentliche Funktion ausführen
-        callback_function(e)
+        finally:
+            progress_bar.visible = False
+            progress_bar.color = None
+            progress_bar.value = None
+            button.disabled = False
+            self.page.update()
 
-    async def animate_and_create_circle(self, e):
-        # Ruft unsere allgemeine Blink-Funktion auf
-        await self.animate_button_blink(
-            button_to_animate=self.circle_make_button,
-            callback_function=self.create_circle,
-            e=e
-        )
+    async def handle_rect_creation(self, e):
+        """Neuer Event-Handler für den Rechteck-Button."""
+        await self.run_task_with_progress(e, self.rect_make_button, self.rect_progress, self.create_rect)
 
+    async def handle_circle_creation(self, e):
+        """Neuer Event-Handler für den Kreis-Button."""
+        await self.run_task_with_progress(e, self.circle_make_button, self.circle_progress, self.create_circle)
 
-    async def animate_and_create_rect(self, e):
-        # Ruft ebenfalls unsere allgemeine Blink-Funktion auf
-        await self.animate_button_blink(
-            button_to_animate=self.rect_make_button,
-            callback_function=self.create_rect,
-            e=e
-        )
-
-    # Schraubstock erstellen button binken lassen
-    async def animate_and_copy_file(self, e):
-        await self.animate_button_blink(
-            button_to_animate=self.vice_create_button,
-            callback_function=self.copy_file,
-            e=e
-        )
-    #programm ausgeben aufleuchten lassen
     async def animate_and_move_files(self, e):
-        # 1. Button deaktivieren, um mehrfaches Klicken zu verhindern
         self.export_button.disabled = True
         self.page.update()
 
-        # 2. Farbe zu einem schönen Grün ändern (der Übergang wird animiert)
-        self.export_button.bgcolor = ft.Colors.GREEN_700
+        self.export_button.bgcolor = ft.Colors.GREEN_600
         self.page.update()
 
         await asyncio.sleep(1)
 
-        # 4. Farbe zurück zu Rot ändern (der Übergang wird wieder animiert)
-        self.export_button.bgcolor = ft.Colors.RED
+        self.export_button.bgcolor = ft.Colors.RED_600
         self.page.update()
 
-        await asyncio.sleep(2,5)  # Muss der Dauer von animate_bgcolor entsprechen
+        await asyncio.sleep(2.5)
 
-        # 6. Button wieder aktivieren
         self.export_button.disabled = False
         self.page.update()
 
-        # 7. Erst jetzt die eigentliche Dateiverschiebung starten
         self.move_files(e)
 
-    # Event Handler Funktionen
     def on_width_change(self, e):
         self.update_value_entry()
         self.update_folder_selection(e)
@@ -554,13 +690,13 @@ class BlankMakerApp:
         self.page.update()
 
     def start_kombiablauf(self, e):
-        kombi = Kombiablauf(self.page, # Hinzugefügt: Die Flet Page Instanz
-                           self.ctrl_v_field,
-                           self.selection_dropdown,
-                           self.destination_field,
-                           self.length_field,
-                           self.width_field,
-                           self.height_field)
+        kombi = Kombiablauf(self.page,
+                            self.ctrl_v_field,
+                            self.selection_dropdown,
+                            self.destination_field,
+                            self.length_field,
+                            self.width_field,
+                            self.height_field)
         try:
             kombi.kombiablauf()
         except Exception as ex_kombi_start:
@@ -660,100 +796,38 @@ class BlankMakerApp:
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Kopieren der Datei: {e}")
 
-
-    #Pyautogui Automatisierung noch nicht ausgelagert
     def execute_actions(self, e):
         try:
-            self.action_1()
-            self.action_2()
-            self.action_3()
-            self.action_4()
-            self.action_5()
-            self.action_6()
-            self.action_7()
+            program_name = self.ctrl_v_field.value
+            machine_type = self.selection_dropdown.value
+            destination_folder = self.destination_field.value
+
+            if not program_name or not machine_type:
+                self.show_dialog("Eingabe fehlt", "Bitte Programmnamen und Maschinenart angeben.")
+                return
+
+            actions.action_1()
+            actions.action_2()
+            actions.action_3(program_name)
+            actions.action_4(program_name)
+            actions.action_5(machine_type)
+            actions.action_6()
+            actions.action_7(destination_folder)
+
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Ausführen der Aktionen: {e}")
-
-    def action_1(self):
-        image_position = pyscreeze.locateOnScreen('Bilder/1.png', confidence=0.5)
-        image_center = pyscreeze.center(image_position)
-        time.sleep(0.5)
-        pyautogui.click(image_center)
-        time.sleep(0.5)
-
-    def action_2(self):
-        image_position = pyscreeze.locateOnScreen('Bilder/2.png', confidence=0.4)
-        image_center = pyscreeze.center(image_position)
-        time.sleep(0.9)
-        pyautogui.click(image_center)
-
-    def action_3(self):
-        image_position = pyscreeze.locateOnScreen('Bilder/3.png', confidence=0.5, grayscale=True)
-        image_center = pyscreeze.center(image_position)
-        time.sleep(0.4)
-        pyautogui.doubleClick(image_center)
-        time.sleep(0.2)
-        pyautogui.press('delete')
-        time.sleep(0.1)
-        text = self.ctrl_v_field.value + '_A'
-        pyautogui.typewrite(text)
-        time.sleep(0.1)
-
-    def action_4(self):
-        pyautogui.press('tab')
-        pyautogui.press('tab')
-        time.sleep(0.1)
-        pyautogui.press('delete')
-        time.sleep(0.1)
-        text = self.ctrl_v_field.value
-        pyautogui.typewrite(text)
-        time.sleep(0.1)
-
-    def action_5(self):
-        pyautogui.press('tab')
-        time.sleep(0.1)
-        pyautogui.hotkey('ctrl', 'a')
-        pyautogui.press('delete')
-        time.sleep(0.1)
-        text = self.selection_dropdown.value
-        pyautogui.typewrite(text)
-        time.sleep(0.1)
-
-    def action_6(self):
-        pyautogui.press('enter')
-        time.sleep(0.1)
-
-    def action_7(self):
-        wegzeit1 = 0.4
-        pfad_rohteil = os.path.join(self.destination_field.value, "!rohteil.dxf")
-        pfad_schraubstock = os.path.join(self.destination_field.value, "!schraubstock.step")
-        pyautogui.doubleClick(974, 1047, duration=wegzeit1)
-        time.sleep(0.5)
-        pyautogui.hotkey('ctrl', 'o')
-        time.sleep(0.5)
-        pyautogui.typewrite(pfad_rohteil)
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        time.sleep(0.5)
-        pyautogui.doubleClick(977, 1142, duration=wegzeit1)
-        time.sleep(0.5)
-        pyautogui.hotkey('ctrl', 'o')
-        time.sleep(0.8)
-        pyautogui.typewrite(pfad_schraubstock)
-        time.sleep(0.8)
-        pyautogui.press('enter')
 
     def move_files(self, e):
         at_prefix = self.at_prefix_field.value
         project_name = self.project_name_field.value
         if not at_prefix:
             self.status_label.value = "Fehler: Gebe AT- .. ein!"
-            self.status_label.color = ft.Colors.RED
+            self.status_label.color = ft.Colors.RED_600
             self.page.update()
             return
         if not project_name:
             self.status_label.value = "Fehler: Projektnamen fehlt!"
-            self.status_label.color = ft.Colors.RED
+            self.status_label.color = ft.Colors.RED_600
             self.page.update()
             return
 
@@ -764,13 +838,13 @@ class BlankMakerApp:
             machine_files = glob.glob(source_path)
             if not machine_files:
                 self.status_label.value = f"Warnung: Keine Dateien zum Verschieben gefunden in {machine}!"
-                self.status_label.color = ft.Colors.ORANGE
+                self.status_label.color = ft.Colors.ORANGE_400
             else:
                 files_to_move += machine_files
 
         if not files_to_move:
             self.status_label.value = "Fehler: Nichts gefunden und verschoben!"
-            self.status_label.color = ft.Colors.RED
+            self.status_label.color = ft.Colors.RED_600
             self.page.update()
             return
 
@@ -787,7 +861,7 @@ class BlankMakerApp:
                 os.remove(file_path)
 
         self.status_label.value = "Programme verschoben!"
-        self.status_label.color = ft.Colors.GREEN
+        self.status_label.color = ft.Colors.GREEN_600
         self.page.update()
 
     def check_dxf_files(self):
@@ -799,15 +873,14 @@ class BlankMakerApp:
 
         if dxf_files:
             status_text = f"Status: {len(dxf_files)} Programm(e) gefunden ;-)"
-            self.status_label1.color = ft.Colors.GREEN
+            self.status_label1.color = ft.Colors.GREEN_600
         else:
             status_text = "Status: Kein Programm gefunden!"
-            self.status_label1.color = ft.Colors.RED
+            self.status_label1.color = ft.Colors.RED_600
 
         self.status_label1.value = status_text
         self.page.update()
 
-        # Timer für nächste Überprüfung
         self.page.run_task(self.delayed_check)
 
     async def delayed_check(self):
@@ -825,17 +898,14 @@ class BlankMakerApp:
         except Exception as e:
             self.show_dialog("Fehler", f"Fehler beim Starten des Programms: {e}")
 
-    # prozess.pyw starten und killen
     def run_python_script(self, e):
         try:
             script_path = base_path5
 
-            # Prüfe ob bereits ein Prozess läuft
             if self.script_process is not None and self.script_process.poll() is None:
                 self.show_dialog("Info", "Prozess läuft bereits!")
                 return
 
-            # Starte neuen Prozess
             self.script_process = subprocess.Popen(
                 ["python", script_path],
                 stdout=subprocess.PIPE,
@@ -844,15 +914,13 @@ class BlankMakerApp:
                 creationflags=subprocess.CREATE_NO_WINDOW
             )
 
-            # UI aktualisieren
             self.start_button.disabled = True
             self.stop_button.disabled = False
-            self.status_icon.color = ft.Colors.GREEN
+            self.status_icon.color = ft.Colors.GREEN_600
             self.status_text.value = "Läuft"
-            self.status_text.color = ft.Colors.GREEN
+            self.status_text.color = ft.Colors.GREEN_600
             self.page.update()
 
-            # Optional: Status-Überwachung in separatem Thread
             self.page.run_task(self.monitor_process)
 
         except FileNotFoundError:
@@ -866,28 +934,23 @@ class BlankMakerApp:
             return
 
         try:
-            # Prüfe ob Prozess noch läuft
             if self.script_process.poll() is not None:
                 self.show_dialog("Info", "Prozess ist bereits beendet!")
                 self.reset_ui_to_stopped()
                 return
 
-            # Versuche graceful shutdown
             self.script_process.terminate()
 
-            # Warte auf Beendigung (max 3 Sekunden)
             try:
                 self.script_process.wait(timeout=3)
                 print("Prozess erfolgreich beendet")
             except subprocess.TimeoutExpired:
-                # Force kill falls terminate() nicht funktioniert
                 print("Prozess antwortet nicht, force kill...")
                 self.script_process.kill()
                 self.script_process.wait(timeout=2)
 
         except Exception as ex:
             print(f"Fehler beim Beenden: {ex}")
-            # Als letzter Ausweg - OS-Level kill
             try:
                 import os, signal
                 if hasattr(self.script_process, 'pid'):
@@ -902,23 +965,21 @@ class BlankMakerApp:
         """Setzt die UI auf 'gestoppt' zurück"""
         self.start_button.disabled = False
         self.stop_button.disabled = True
-        self.status_icon.color = ft.Colors.RED
+        self.status_icon.color = ft.Colors.RED_600
         self.status_text.value = "Gestoppt"
-        self.status_text.color = ft.Colors.RED
+        self.status_text.color = ft.Colors.RED_600
         self.page.update()
 
     async def monitor_process(self):
         """Überwacht den Prozess-Status"""
         while self.script_process is not None:
             if self.script_process.poll() is not None:
-                # Prozess ist beendet
                 print("Prozess wurde beendet")
                 self.script_process = None
                 self.reset_ui_to_stopped()
                 break
-            await asyncio.sleep(1)  # Prüfe jede Sekunde
+            await asyncio.sleep(1)
 
-    # NEU: Methoden zum Starten und Stoppen der externen Flet-Anwendung
     def start_external_flet_app(self, e):
         try:
             if not os.path.exists(PATH_TO_EXTERNAL_FLET_APP):
@@ -930,22 +991,22 @@ class BlankMakerApp:
                 return
 
             self.external_flet_process = subprocess.Popen(
-                ["python", PATH_TO_EXTERNAL_FLET_APP],  # oder "pythonw"
+                ["python", PATH_TO_EXTERNAL_FLET_APP],
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
 
             self.start_external_flet_button.disabled = True
             self.stop_external_flet_button.disabled = False
             self.external_flet_status_text.value = "Externe Flet App: Läuft"
-            self.external_flet_status_text.color = ft.Colors.GREEN_ACCENT_700
+            self.external_flet_status_text.color = ft.Colors.GREEN_700
             self.page.update()
-            self.page.run_task(self.monitor_external_flet_process)  # Eigene Monitor-Funktion
+            self.page.run_task(self.monitor_external_flet_process)
 
         except Exception as ex:
             self.show_dialog("Fehler", f"Fehler beim Starten der externen Flet App: {ex}")
             self.external_flet_status_text.value = f"Externe Flet App: Startfehler"
-            self.external_flet_status_text.color = ft.Colors.RED
-            self.start_external_flet_button.disabled = False  # Start wieder erlauben
+            self.external_flet_status_text.color = ft.Colors.RED_600
+            self.start_external_flet_button.disabled = False
             self.stop_external_flet_button.disabled = True
             self.page.update()
 
@@ -956,20 +1017,17 @@ class BlankMakerApp:
             return
 
         try:
-            self.external_flet_process.terminate()  # Sendet SIGTERM (freundliche Anfrage zum Beenden)
+            self.external_flet_process.terminate()
             try:
-                # Warte kurz, ob der Prozess von selbst terminiert
-                self.external_flet_process.wait(timeout=10)  # 5 Sekunden Timeout
+                self.external_flet_process.wait(timeout=10)
                 print("Externe Flet App erfolgreich via terminate() beendet.")
             except subprocess.TimeoutExpired:
-                # Wenn terminate() nicht reicht, erzwinge das Beenden
                 print("Externe Flet App reagiert nicht auf terminate(), versuche kill()...")
-                self.external_flet_process.kill()  # Sendet SIGKILL (sofortiges Beenden)
-                self.external_flet_process.wait(timeout=2)  # Kurz warten auf kill
+                self.external_flet_process.kill()
+                self.external_flet_process.wait(timeout=2)
                 print("Externe Flet App via kill() beendet.")
         except Exception as ex:
             self.show_dialog("Fehler", f"Problem beim Beenden der externen Flet App: {ex}")
-            # Versuche, den Prozess im Fehlerfall trotzdem als beendet zu markieren
             print(f"Fehler beim Stoppen der externen Flet App: {ex}")
         finally:
             self.external_flet_process = None
@@ -979,22 +1037,19 @@ class BlankMakerApp:
         self.start_external_flet_button.disabled = False
         self.stop_external_flet_button.disabled = True
         self.external_flet_status_text.value = "Externe Flet App: Gestoppt"
-        self.external_flet_status_text.color = ft.Colors.GREY
+        self.external_flet_status_text.color = "onsurfacevariant"
         self.page.update()
 
     async def monitor_external_flet_process(self):
         """Überwacht den externen Flet-Prozess-Status"""
         while self.external_flet_process is not None:
             if self.external_flet_process.poll() is not None:
-                # Prozess ist beendet (entweder durch unseren Stop-Button oder manuell vom User)
                 print("Externe Flet App wurde beendet.")
-                self.external_flet_process = None  # Wichtig, um den Zustand zu aktualisieren
+                self.external_flet_process = None
                 self.reset_external_flet_ui_to_stopped()
                 break
-            await asyncio.sleep(1)  # Prüfe jede Sekunde
+            await asyncio.sleep(1)
 
-
-    #B Seitenautomatisierung
     def start_bseite(self, e):
         try:
             partheight_str = self.blength_field.value.replace(',', '.')
@@ -1002,16 +1057,11 @@ class BlankMakerApp:
                 self.show_dialog("Fehler", "Bitte Fertigteilhöhe für B-Seite eingeben.")
                 return
             partheight = float(partheight_str)
-
-            # Übergebe self.page an start_mausbewegungen
-            start_mausbewegungen(self.page, partheight) # NEU: self.page übergeben
-
-
+            start_mausbewegungen(self.page, partheight)
         except ValueError:
             self.show_dialog("Fehler", "Ungültige Eingabe für Fertigteilhöhe. Bitte eine Zahl eingeben.")
-        except Exception as ex: # Fange auch andere Fehler ab, die von start_mausbewegungen kommen könnten
+        except Exception as ex:
             self.show_dialog("Fehler", f"Fehler beim Starten der B-Seite: {ex}")
-            #traceback.print_exc() # Gibt den vollen Traceback in der Konsole aus
 
     def load_step_file(self, e):
         file_name = self.ctrl_v_field.value.strip()
@@ -1041,7 +1091,6 @@ class BlankMakerApp:
                            f"X={raw_part_size['X']}, Y={raw_part_size['Y']}, Z={raw_part_size['Z']}")
             self.original_size_label.value = result_text
 
-            # Füllen der Eingabefelder mit Ganzzahlen
             self.length_field.value = f"{raw_part_size['X']}"
             self.width_field.value = f"{raw_part_size['Y']}"
             self.height_field.value = f"{raw_part_size['Z']}"
@@ -1123,19 +1172,40 @@ class BlankMakerApp:
 def main(page: ft.Page):
     # Fensterkonfiguration
     page.title = "BMM 9.FLET by Gschwendtner Johannes"
-
-    # KORREKTUR: Verwende page.window statt direkter Attribute
     page.window.width = 600
-    page.window.height = 1400
+    page.window.height = 1405
     page.window.resizable = True
     page.window.maximizable = True
-    page.window.left = 0
+    page.window.left = -5
     page.window.top = 0
 
-    # Zentrierung
-    #page.window.center()
+    # NEU: Definition der Farbthemen mit deinen Hex-Codes
+    page.theme = ft.Theme(
+        color_scheme=ft.ColorScheme(
+            primary="#049fb4",  # Dein Haupt-Cyan
+            primary_container="#e0f7fa",  # Ein sehr heller Cyan-Ton für Container-Hintergründe
+            on_primary_container="#036f7e",  # Dein dunkler Cyan-Ton als Text auf hellen Containern
+            secondary_container=ft.Colors.BLUE_GREY_200,
+            on_secondary_container=ft.Colors.BLUE_GREY_900,
+            outline_variant=ft.Colors.GREY_400,
+        ),
+        use_material3=True,
+    )
+    page.dark_theme = ft.Theme(
+        color_scheme=ft.ColorScheme(
+            primary="#05cfea",  # Dein hellster Cyan-Ton für gute Sichtbarkeit im Dark Mode
+            primary_container="#036f7e",  # Dein dunkelster Cyan-Ton für Container-Hintergründe
+            on_primary_container=ft.Colors.WHITE,  # Heller Text auf dem dunklen Container
+            secondary_container=ft.Colors.BLUE_GREY_700,
+            on_secondary_container=ft.Colors.BLUE_GREY_100,
+            outline_variant=ft.Colors.GREY_700,
+        ),
+        use_material3=True,
+    )
 
-    page.theme_mode = ft.ThemeMode.LIGHT
+    # Passt sich automatisch dem OS-Modus (Light/Dark) an
+    page.theme_mode = ft.ThemeMode.DARK
+
     app = BlankMakerApp(page)
 
 
