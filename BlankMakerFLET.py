@@ -203,17 +203,17 @@ class BlankMakerApp:
             width=300,
             options=[],
             filled=True,
-            bgcolor=ft.Colors.GREY_800,
+            bgcolor=ft.Colors.GREY_400,
             border=ft.InputBorder.OUTLINE,
             border_radius=5,
             border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
-            focused_border_color="#05cfea",
+            focused_border_color="#dff3f8",
         )
 
         self.selection_dropdown = ft.Dropdown(
             label="Maschinenart:",
             width=300,filled=True,
-            bgcolor=ft.Colors.GREY_800,
+            bgcolor=ft.Colors.GREY_400,
             border=ft.InputBorder.OUTLINE,
             border_radius=5,
             border_color=ft.Colors.with_opacity(0.5, ft.Colors.WHITE),
@@ -1175,7 +1175,7 @@ def main(page: ft.Page):
     )
 
     # Passt sich automatisch dem OS-Modus (Light/Dark) an
-    page.theme_mode = ft.ThemeMode.DARK
+    page.theme_mode = ft.ThemeMode.LIGHT
 
     app = BlankMakerApp(page)
 
