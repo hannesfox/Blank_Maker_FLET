@@ -75,7 +75,7 @@ class Kombiablauf:
             hwnd = win32gui.FindWindow(None, self.flet_window_title)
             if hwnd:
                 print(f"[FletThread {threading.get_ident()}] Fenster-Handle gefunden: {hwnd}")
-                win32gui.ShowWindow(hwnd, win32con.SW_RESTORE);
+                win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
                 win32gui.SetForegroundWindow(hwnd)
                 print(f"[FletThread {threading.get_ident()}] SetForegroundWindow für HWND {hwnd} aufgerufen.")
                 return True
@@ -85,8 +85,8 @@ class Kombiablauf:
                 return False
         except Exception as e_fg:
             print(
-                f"[FletThread {threading.get_ident()}] Fehler beim Versuch, Fenster in Vordergrund zu bringen: {e_fg}");
-            traceback.print_exc();
+                f"[FletThread {threading.get_ident()}] Fehler beim Versuch, Fenster in Vordergrund zu bringen: {e_fg}")
+            traceback.print_exc()
             return False
 
     def _run_tkinter_dot_thread(self, x, y, size):
@@ -188,8 +188,8 @@ class Kombiablauf:
                 length_str = self.length_field.value.replace(',', '.')
                 width_str = self.width_field.value.replace(',', '.')
                 height_str = self.height_field.value.replace(',', '.')
-                length = float(length_str);
-                width = float(width_str);
+                length = float(length_str)
+                width = float(width_str)
                 height = float(height_str)
                 run_program(length, width, height)
             except ValueError:
@@ -262,12 +262,12 @@ class Kombiablauf:
         print(f"[WorkerThread {worker_thread_id}] _perform_actions gestartet.")
         try:
             time.sleep(0.2)
-            self.action_1();
-            self.action_2();
-            self.action_3();
-            self.action_4();
-            self.action_5();
-            self.action_6();
+            self.action_1()
+            self.action_2()
+            self.action_3()
+            self.action_4()
+            self.action_5()
+            self.action_6()
             self.action_7()
             print(f"[WorkerThread {worker_thread_id}] Aktionen erfolgreich beendet.")
             time.sleep(0.5)
@@ -316,7 +316,7 @@ class Kombiablauf:
         image_position = pyscreeze.locateOnScreen(image_to_find, confidence=confidence, grayscale=grayscale)
         if image_position is None: raise Exception(
             f"Bild '{os.path.basename(image_to_find)}' für {action_name} nicht auf dem Bildschirm gefunden.")
-        image_center = pyscreeze.center(image_position);
+        image_center = pyscreeze.center(image_position)
         time.sleep(wait_before_click)
         if click_type == "click":
             pyautogui.click(image_center)
@@ -325,61 +325,61 @@ class Kombiablauf:
         time.sleep(wait_after_click)
 
     def action_1(self):
-        print(f"[WorkerThread {threading.get_ident()}] A1"); self._locate_and_click('Bilder/1.png', 0.5, "A1",
-                                                                                    wait_after_click=0.5); print(
+        print(f"[WorkerThread {threading.get_ident()}] A1"), self._locate_and_click('Bilder/1.png', 0.5, "A1",
+                                                                                    wait_after_click=0.5), print(
             f"[WorkerThread {threading.get_ident()}] A1 ende")
 
     def action_2(self):
-        print(f"[WorkerThread {threading.get_ident()}] A2"); self._locate_and_click('Bilder/2.png', 0.4, "A2",
-                                                                                    wait_after_click=0.9); print(
+        print(f"[WorkerThread {threading.get_ident()}] A2"), self._locate_and_click('Bilder/2.png', 0.4, "A2",
+                                                                                    wait_after_click=0.9), print(
             f"[WorkerThread {threading.get_ident()}] A2 ende")
 
     def action_3(self):
-        print(f"[WorkerThread {threading.get_ident()}] A3"); self._locate_and_click('Bilder/3.png', 0.5, "A3 (Bild)",
+        print(f"[WorkerThread {threading.get_ident()}] A3"), self._locate_and_click('Bilder/3.png', 0.5, "A3 (Bild)",
                                                                                     click_type="doubleclick",
                                                                                     grayscale=True,
-                                                                                    wait_after_click=0.4); time.sleep(
-            0.2); pyautogui.press('delete'); time.sleep(0.1); pyautogui.typewrite(
+                                                                                    wait_after_click=0.4), time.sleep(
+            0.2), pyautogui.press('delete'), time.sleep(0.1), pyautogui.typewrite(
             self.ctrl_v_field.value + '_A'); time.sleep(0.1); print(f"[WorkerThread {threading.get_ident()}] A3 ende")
 
     def action_4(self):
-        print(f"[WorkerThread {threading.get_ident()}] A4"); pyautogui.press('tab', presses=2,
-                                                                             interval=0.1); time.sleep(
-            0.1); pyautogui.press('delete'); time.sleep(0.1); pyautogui.typewrite(self.ctrl_v_field.value); time.sleep(
+        print(f"[WorkerThread {threading.get_ident()}] A4"), pyautogui.press('tab', presses=2,
+                                                                             interval=0.1), time.sleep(
+            0.1), pyautogui.press('delete'), time.sleep(0.1), pyautogui.typewrite(self.ctrl_v_field.value), time.sleep(
             0.1); print(f"[WorkerThread {threading.get_ident()}] A4 ende")
 
     def action_5(self):
-        print(f"[WorkerThread {threading.get_ident()}] A5"); pyautogui.press('tab'); time.sleep(0.1); pyautogui.hotkey(
-            'ctrl', 'a'); pyautogui.press('delete'); time.sleep(
+        print(f"[WorkerThread {threading.get_ident()}] A5"), pyautogui.press('tab'), time.sleep(0.1), pyautogui.hotkey(
+            'ctrl', 'a'), pyautogui.press('delete'), time.sleep(
             0.1); text = self.selection_dropdown.value; assert text and text != "Option", "Gültigen Programmtyp auswählen für A5."; pyautogui.typewrite(
             text); time.sleep(0.1); print(f"[WorkerThread {threading.get_ident()}] A5 ende")
 
     def action_6(self):
-        print(f"[WorkerThread {threading.get_ident()}] A6"); pyautogui.press('enter'); time.sleep(0.1); print(
+        print(f"[WorkerThread {threading.get_ident()}] A6"), pyautogui.press('enter'), time.sleep(0.1), print(
             f"[WorkerThread {threading.get_ident()}] A6 ende")
 
     def action_7(self):
-        print(f"[WorkerThread {threading.get_ident()}] A7");
-        dest_folder = self.destination_field.value;
+        print(f"[WorkerThread {threading.get_ident()}] A7")
+        dest_folder = self.destination_field.value
         assert dest_folder and os.path.isdir(dest_folder), f"Zielordner '{dest_folder}' ungültig/nicht existent für A7."
-        rt = os.path.join(dest_folder, "!rohteil.dxf");
-        ss = os.path.join(dest_folder, "!schraubstock.step");
-        assert os.path.isfile(rt), f"Datei '{rt}' nicht gefunden für A7.";
+        rt = os.path.join(dest_folder, "!rohteil.dxf")
+        ss = os.path.join(dest_folder, "!schraubstock.step")
+        assert os.path.isfile(rt), f"Datei '{rt}' nicht gefunden für A7."
         assert os.path.isfile(ss), f"Datei '{ss}' nicht gefunden für A7."
-        pyautogui.doubleClick(974, 1047, duration=0.4);
-        time.sleep(0.5);
-        pyautogui.hotkey('ctrl', 'o');
-        time.sleep(0.5);
-        pyautogui.typewrite(rt);
-        time.sleep(0.5);
-        pyautogui.press('enter');
+        pyautogui.doubleClick(974, 1047, duration=0.4)
+        time.sleep(0.5)
+        pyautogui.hotkey('ctrl', 'o')
+        time.sleep(0.5)
+        pyautogui.typewrite(rt)
+        time.sleep(0.5)
+        pyautogui.press('enter')
         time.sleep(1.0)
-        pyautogui.doubleClick(977, 1142, duration=0.4);
-        time.sleep(0.5);
-        pyautogui.hotkey('ctrl', 'o');
-        time.sleep(0.8);
-        pyautogui.typewrite(ss);
-        time.sleep(0.8);
-        pyautogui.press('enter');
-        time.sleep(1.0);
+        pyautogui.doubleClick(977, 1142, duration=0.4)
+        time.sleep(0.5)
+        pyautogui.hotkey('ctrl', 'o')
+        time.sleep(0.8)
+        pyautogui.typewrite(ss)
+        time.sleep(0.8)
+        pyautogui.press('enter')
+        time.sleep(1.0)
         print(f"[WorkerThread {threading.get_ident()}] A7 ende")
