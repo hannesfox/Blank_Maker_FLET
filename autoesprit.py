@@ -1,3 +1,4 @@
+#autoesprit.py
 import pyautogui
 import time
 import tkinter as tk

@@ -1,3 +1,4 @@
+#prozess.pyw
 import pyautogui
 import keyboard
 import time
