@@ -1,10 +1,8 @@
-#BlankMakerFLET.py
 import flet as ft
 import config
-from ui_elements import create_all_ui_elements
-from ui_layout import build_main_ui
-from event_handlers import EventHandlersBase
-
+from ui.elements import create_all_ui_elements
+from ui.layout import build_main_ui
+from core.event_handlers import EventHandlersBase # Angepasster Import
 
 
 class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
@@ -24,11 +22,14 @@ class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
         self.external_flet_process = None
 
         # --- Datumsabhängige Pfade dynamisch erstellen ---
-        # BASE_PATH4 wird jetzt direkt von config geladen
-        self.base_path4 = config.BASE_PATH4 # Wird in create_all_ui_elements für destination_field verwendet
+        self.base_path4 = config.BASE_PATH4 # Wird in ui.elements für destination_field verwendet
 
         # --- UI-Erstellung (Widgets werden an self gebunden) ---
         create_all_ui_elements(self) # Übergibt die aktuelle Instanz
+
+        # --- Event-Handler Initialisierung (ruft Methoden aus EventHandlersBase) ---
+        super().__init__() # Wichtig: Initialisiert die Basisklasse korrekt, falls sie einen eigenen __init__ hätte
+                           # In diesem Fall werden Methoden wie get_folder_options direkt aufgerufen.
 
         # --- Ordneroptionen laden (nachdem UI-Elemente erstellt wurden) ---
         self.folder_options = self.get_folder_options() # Methode aus EventHandlersBase
@@ -48,12 +49,12 @@ class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
 
 def main(page: ft.Page):
     # --- Fensterkonfiguration ---
-    page.title = "BMM 9.FLET by Gschwendtner Johannes"
-    page.window.width = 600
-    page.window.height = 950 # Angepasst, um Scrollen zu reduzieren, je nach Inhalt anpassen
+    page.title = "BMM 10.FLET by Gschwendtner Johannes" # Versionsnummer angepasst
+    page.window.width = 680
+    page.window.height = 1200
     page.window.resizable = True
     page.window.maximizable = True
-    page.window.left = -5 # Kann zu Problemen auf manchen Systemen führen, ggf. anpassen oder entfernen
+    page.window.left = -5
     page.window.top = 0
 
     # --- Definition der Farbthemen (Light & Dark) ---
@@ -80,12 +81,11 @@ def main(page: ft.Page):
         ),
         use_material3=True,
     )
-    page.theme_mode = ft.ThemeMode.LIGHT # Oder ft.ThemeMode.SYSTEM
+    page.theme_mode = ft.ThemeMode.DARK
 
     # --- App-Instanz erstellen und ausführen ---
     app = BlankMakerApp(page)
     # Die Page wird durch das `app` Objekt bereits initialisiert und aufgebaut.
-    # page.add() ist nicht mehr nötig, da build_main_ui dies bereits tut.
 
 if __name__ == '__main__':
     ft.app(target=main)
