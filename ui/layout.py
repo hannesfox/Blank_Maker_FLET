@@ -121,7 +121,7 @@ def build_main_ui(app_instance):
             ], spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER),
             # Zweite Zeile: MAKE Schraubstock Button
             ft.Container(
-                content=ft.Column([
+                content=ft.Row([
                     app_instance.vice_create_button,
                     app_instance.vice_progress
                 ], spacing=4),
