@@ -355,9 +355,9 @@ class KombiWorkflow:
         # --- Schraubstock laden in Esprit ---
         print(f"{worker_id} Lade Schraubstock in Esprit. Pfad für typewrite: \"{schraubstock_path_str_constructed}\"")
         pyautogui.doubleClick(977, 1142, duration=0.4 * speed)
-        time.sleep(0.5 * speed)
+        time.sleep(1.5 * speed)
         pyautogui.hotkey('ctrl', 'o')
-        time.sleep(1.2 * speed)
+        time.sleep(1.5 * speed)
         pyautogui.typewrite(f'"{schraubstock_path_str_constructed}"')  # In Anführungszeichen
         time.sleep(1.8 * speed)
         pyautogui.press('enter')

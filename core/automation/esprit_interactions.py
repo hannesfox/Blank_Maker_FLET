@@ -7,6 +7,15 @@ import traceback
 import os
 from pathlib import Path
 
+PYWIN32_AVAILABLE = False
+if os.name == 'nt':
+    try:
+        import win32gui
+        import win32con
+        PYWIN32_AVAILABLE = True
+        print("esprit_interactions: pywin32 erfolgreich importiert.")
+    except ImportError:
+        print("WARNUNG (esprit_interactions): pywin32 nicht installiert. Fokus kann nicht erzwungen werden.")
 
 # --- Hilfsfunktion zum Anzeigen von Flet-Dialogen aus Threads ---
 def _show_flet_dialog_from_thread(page_ref: ft.Page, title: str, content_text: str, is_error: bool = False,
