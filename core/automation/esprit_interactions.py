@@ -22,30 +22,27 @@ def _show_flet_dialog_from_thread(page_ref: ft.Page, title: str, content_text: s
                                   bring_to_front_func=None):
     """Zeigt einen Flet Dialog an. `bring_to_front_func` ist optional."""
 
-    # Optional: Versuche Flet-Fenster in Vordergrund zu bringen
     if callable(bring_to_front_func):
         bring_to_front_func()
-        time.sleep(0.1)  # Kurze Pause
+        time.sleep(0.1)
 
-    # Die Funktion, die den Dialog tatsächlich öffnet
     def _open_dialog_action():
-        # Schließe eventuell offenen Dialog zuerst
-        if page_ref.dialog and page_ref.dialog.open:
-            page_ref.close_dialog()
-            # Manchmal braucht Flet einen Moment, um den alten Dialog zu schließen
-            # await asyncio.sleep(0.05) # Nur in async Kontext, hier nicht direkt möglich
+        current_dialog_instance_ref = None  # Vorabdeklaration für die Closure
 
-        dialog_to_show = ft.AlertDialog(
+        def _close_this_specific_dialog(e=None):
+            if current_dialog_instance_ref:  # Nur schließen, wenn eine Instanz existiert
+                page_ref.close(current_dialog_instance_ref)
+
+        current_dialog_instance_ref = ft.AlertDialog(
             modal=True,
             title=ft.Text(title),
             content=ft.Text(content_text),
-            actions=[ft.TextButton("OK", on_click=lambda _: page_ref.close(dialog_to_show))],
+            actions=[ft.TextButton("OK", on_click=_close_this_specific_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
-            on_dismiss=lambda _: print(f"Dialog '{title}' (Esprit Interaktion) abgewiesen.")
+            on_dismiss=_close_this_specific_dialog
         )
-        page_ref.open(dialog_to_show)  # Flet's page.open ist thread-safe
+        page_ref.open(current_dialog_instance_ref)
 
-    # Führe das Öffnen im Flet-Hauptthread aus (page.open sollte dies handhaben)
     _open_dialog_action()
 
 

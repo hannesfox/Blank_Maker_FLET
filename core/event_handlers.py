@@ -462,3 +462,35 @@ class EventHandlersBase:
         self._active_dialog_instance = current_dialog_for_action  # Referenz auf den NEUEN Dialog setzen
         self.page.open(current_dialog_for_action)
         # self.page.update() # page.open sollte update auslösen
+
+    def clear_textfield_on_focus(self, e: ft.ControlEvent):
+        """
+        Löscht den Inhalt des Textfeldes, das den Fokus erhalten hat,
+        aber nur, wenn es bereits Inhalt hatte.
+        Dies verhindert das Löschen bei der allerersten Fokussierung.
+        """
+        textfield_instance = e.control
+        if textfield_instance.value:
+            if hasattr(textfield_instance,
+                       "already_had_focus_with_value") and textfield_instance.already_had_focus_with_value:
+                textfield_instance.value = ""  # Inhalt löschen
+                # print(f"Textfeld '{textfield_instance.label}' wurde bei erneutem Fokus gelöscht.") # Für Debugging
+                textfield_instance.update()  # UI aktualisieren
+
+            # Setze das Flag, dass es jetzt fokussiert wurde und einen Wert hatte (oder hat)
+            textfield_instance.already_had_focus_with_value = True
+        else:
+            # Wenn das Feld leer ist, wenn es fokussiert wird, setzen wir das Flag zurück.
+            textfield_instance.already_had_focus_with_value = False
+
+    def mark_textfield_as_potentially_clearable_on_blur(self, e: ft.ControlEvent):
+        """
+        Diese Funktion wird aufgerufen, wenn ein Textfeld den Fokus verliert (on_blur).
+        Wenn es dann einen Wert hat, markieren wir es, damit es beim nächsten Fokus gelöscht werden kann.
+        """
+        textfield_instance = e.control
+        if textfield_instance.value:
+            textfield_instance.already_had_focus_with_value = True
+        else:
+            # Wenn es leer verlassen wird, sollte es beim nächsten Fokus nicht sofort gelöscht werden.
+            textfield_instance.already_had_focus_with_value = False

@@ -19,7 +19,7 @@ def create_all_ui_elements(app_instance):
 
     dropdown_style = {
         "filled": True,
-        "bgcolor": ft.Colors.with_opacity(0.08, ft.Colors.PRIMARY),
+        "bgcolor": ft.Colors.with_opacity(0.8, ft.Colors.PRIMARY),
         "border": ft.InputBorder.OUTLINE,
         "border_radius": 8,
         "border_color": ft.Colors.with_opacity(0.2, ft.Colors.PRIMARY),
@@ -51,18 +51,24 @@ def create_all_ui_elements(app_instance):
     app_instance.length_field = ft.TextField(
         label="X Länge",
         width=120,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         on_change=app_instance.update_folder_selection,
         **textfield_style
     )
     app_instance.width_field = ft.TextField(
         label="Y Breite",
         width=120,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         on_change=app_instance.on_width_change,
         **textfield_style
     )
     app_instance.height_field = ft.TextField(
         label="Z Höhe",
         width=120,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         **textfield_style
     )
 
@@ -70,11 +76,15 @@ def create_all_ui_elements(app_instance):
     app_instance.diameter_field = ft.TextField(
         label="Durchmesser",
         width=140,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         **textfield_style
     )
     app_instance.height2_field = ft.TextField(
         label="Höhe",
         width=140,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         **textfield_style
     )
 
@@ -82,6 +92,8 @@ def create_all_ui_elements(app_instance):
     app_instance.value_field = ft.TextField(
         label="Y Spannweite",
         width=300,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         **textfield_style
     )
 
@@ -89,6 +101,8 @@ def create_all_ui_elements(app_instance):
     app_instance.ctrl_v_field = ft.TextField(
         label="Zeichnungsnummer",
         width=300,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         **textfield_style
     )
     app_instance.at_prefix_field = ft.TextField(
@@ -115,6 +129,8 @@ def create_all_ui_elements(app_instance):
     app_instance.blength_field = ft.TextField(
         label="Fertigteilhöhe B-Seite",
         width=200,
+        on_focus=app_instance.clear_textfield_on_focus,  # Neuer Handler
+        on_blur=app_instance.mark_textfield_as_potentially_clearable_on_blur,  # Neuer Handler
         **textfield_style
     )
 
@@ -163,7 +179,7 @@ def create_all_ui_elements(app_instance):
 
     app_instance.vice_create_button = ft.ElevatedButton(
         content=ft.Row([
-            ft.Icon(ft.Icons.BUILD, size=16),
+            ft.Icon(ft.Icons.ADD_BOX, size=16),
             ft.Text("MAKE Schraubstock")
         ], spacing=4, alignment=ft.MainAxisAlignment.CENTER),
         on_click=app_instance.handle_vice_creation,
