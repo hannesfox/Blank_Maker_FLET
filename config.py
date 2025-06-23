@@ -8,22 +8,29 @@ IS_WINDOWS = os.name == 'nt'
 if IS_WINDOWS:
     user_profile = Path.home()
     try:
-        net_drive_k_resolved = Path(r"K:").resolve(strict=True)
-        net_drive_k = net_drive_k_resolved
-        print(f"Windows: Laufwerk K: gefunden unter {net_drive_k}")
+        # Nur prüfen, ob K: existiert und zugreifbar ist
+        Path(r"K:").resolve(strict=True)
+        # Wenn wir hier ankommen, existiert K:
+        # Hier die Änderung: Stelle sicher, dass der Pfad mit einem Backslash endet, wenn es nur ein Laufwerksbuchstabe ist.
+        net_drive_base_for_paths = Path("K:\\") # Explizit den Laufwerksbuchstaben MIT Backslash verwenden
+        print(f"Windows: Laufwerk K: ist verfügbar und wird als Basis verwendet: {net_drive_base_for_paths}")
     except FileNotFoundError:
         print("Windows: Laufwerk K: nicht gefunden. Verwende Fallback-Pfade auf dem Desktop.")
-        net_drive_k = user_profile / "Desktop" / "K_DRIVE_FALLBACK"
-        (net_drive_k / "NC-PGM").mkdir(parents=True, exist_ok=True)
-        (net_drive_k / "Esprit").mkdir(parents=True, exist_ok=True)
+        net_drive_base_for_paths = user_profile / "Desktop" / "K_DRIVE_FALLBACK"
+        (net_drive_base_for_paths / "NC-PGM").mkdir(parents=True, exist_ok=True)
+        (net_drive_base_for_paths / "Esprit").mkdir(parents=True, exist_ok=True)
 
     BASE_PATH1 = user_profile / "Desktop" / "Spannmittel"
-    BASE_PATH2 = net_drive_k / "NC-PGM"
-    ESPPRIT_BASE_PATH = net_drive_k / "Esprit"
-    # Pfad zum prozess_listener.py (ehemals prozess.pyw)
-    PATH_TO_PROZESS_LISTENER = user_profile / "PycharmProjects" / "BlankMakerFLET_Projekt" / "external_scripts" / "prozess_listener.py"
-    PATH_TO_EXTERNAL_FLET_APP = user_profile / "PycharmProjects" / "ProzessORC" / "Flet-ProzessOCR-1.0.py"
-    BASE_PATH3 = Path("WKS05") # Relativer Pfad
+    BASE_PATH2 = net_drive_base_for_paths / "NC-PGM"
+    ESPPRIT_BASE_PATH = net_drive_base_for_paths / "Esprit" # Wird jetzt K:\Esprit sein
+
+    # Pfad zum prozess_listener.py
+    pycharm_projects_base = user_profile / "PycharmProjects"
+    project_folder_name_actual = "Blank_Maker_FLET" # Stelle sicher, dass dies korrekt ist
+
+    PATH_TO_PROZESS_LISTENER = pycharm_projects_base / project_folder_name_actual / "external_scripts" / "prozess_listener.py"
+    PATH_TO_EXTERNAL_FLET_APP = pycharm_projects_base / "ProzessORC" / "Flet-ProzessOCR-1.0.py"
+    BASE_PATH3 = Path("WKS05")
 else:
     # macOS/Linux Pfade (Passe diese an deine Struktur an!)
     project_root_name = "Blank_Maker_FLET" # Annahme des neuen Projektnamens

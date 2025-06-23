@@ -6,6 +6,7 @@ import flet as ft
 import threading
 import traceback
 from pathlib import Path
+IS_WINDOWS = os.name == 'nt'
 
 # Import der Esprit Automationsfunktion
 from .esprit_interactions import run_esprit_rohteil_definition_sequence  # Umbenannt aus run_program
@@ -292,36 +293,78 @@ class KombiWorkflow:
         pyautogui.press('enter'); time.sleep(0.1 * 0.4)  # Bestätigen
 
     def _action_7(self):  # Dateien laden
-        dest_folder_str = self.destination_field.value
-        if not dest_folder_str or not Path(dest_folder_str).is_dir():
-            raise ValueError(f"Zielordner '{dest_folder_str}' ist ungültig oder nicht existent.")
+        worker_id = f"[WorkerThread {threading.get_ident()}]"
+        print(f"{worker_id} A7: Starte Laden von Dateien")
 
-        rohteil_dxf_path = str(Path(dest_folder_str) / "!rohteil.dxf")
-        schraubstock_step_path = str(Path(dest_folder_str) / "!schraubstock.step")
+        # 1. Hole den Basis-Zielordner-String aus dem Flet-Feld
+        base_dest_folder_from_flet = self.destination_field.value
+        if not base_dest_folder_from_flet:
+            raise ValueError("Zielordner-String (destination_field.value) ist leer.")
+        base_dest_folder_from_flet = str(base_dest_folder_from_flet)  # Sicherstellen, dass es ein String ist
+        print(f"{worker_id} A7_STEP_1: Basis-Zielordner aus Flet-Feld: '{base_dest_folder_from_flet}'")
 
-        if not Path(rohteil_dxf_path).is_file(): raise FileNotFoundError(f"Datei '{rohteil_dxf_path}' nicht gefunden.")
-        if not Path(schraubstock_step_path).is_file(): raise FileNotFoundError(
-            f"Datei '{schraubstock_step_path}' nicht gefunden.")
+        # 2. Überprüfe, ob dieser Basisordner existiert (mit pathlib)
+        if not Path(base_dest_folder_from_flet).is_dir():
+            raise ValueError(f"Basis-Zielordner '{base_dest_folder_from_flet}' ist ungültig oder nicht existent.")
+        print(f"{worker_id} A7_STEP_2: Basis-Zielordner '{base_dest_folder_from_flet}' existiert als Verzeichnis.")
 
-        speed = 0.4
-        # Rohteil laden
-        pyautogui.doubleClick(974, 1047, duration=0.4 * speed);
+        # Dateinamen
+        rohteil_filename = "!rohteil.dxf"
+        schraubstock_filename = "!schraubstock.step"
+
+        # --- Rohteil Pfadkonstruktion und Überprüfung ---
+        print(f"{worker_id} --- ROHTEIL START ---")
+        # 3a. Konstruiere den Rohteil-Pfad mit os.path.join
+        rohteil_path_str_constructed = os.path.join(base_dest_folder_from_flet, rohteil_filename)
+        print(
+            f"{worker_id} A7_STEP_3a (Rohteil): Konstruierter Pfad mit os.path.join: '{rohteil_path_str_constructed}'")
+
+        # 4a. Überprüfe, ob die Rohteil-Datei existiert (mit pathlib auf dem konstruierten String)
+        if not Path(rohteil_path_str_constructed).is_file():
+            raise FileNotFoundError(f"Rohteil-Datei '{rohteil_path_str_constructed}' nicht gefunden.")
+        print(f"{worker_id} A7_STEP_4a (Rohteil): Datei '{rohteil_path_str_constructed}' existiert.")
+        print(f"{worker_id} --- ROHTEIL ENDE ---")
+
+        # --- Schraubstock Pfadkonstruktion und Überprüfung ---
+        print(f"{worker_id} --- SCHRAUBSTOCK START ---")
+        # 3b. Konstruiere den Schraubstock-Pfad mit os.path.join
+        schraubstock_path_str_constructed = os.path.join(base_dest_folder_from_flet, schraubstock_filename)
+        print(
+            f"{worker_id} A7_STEP_3b (Schraubstock): Konstruierter Pfad mit os.path.join: '{schraubstock_path_str_constructed}'")
+
+        # 4b. Überprüfe, ob die Schraubstock-Datei existiert (mit pathlib auf dem konstruierten String)
+        if not Path(schraubstock_path_str_constructed).is_file():
+            raise FileNotFoundError(f"Schraubstock-Datei '{schraubstock_path_str_constructed}' nicht gefunden.")
+        print(f"{worker_id} A7_STEP_4b (Schraubstock): Datei '{schraubstock_path_str_constructed}' existiert.")
+        print(f"{worker_id} --- SCHRAUBSTOCK ENDE ---")
+
+        speed = 0.4  # Dein Speed-Faktor
+
+        # --- Rohteil laden in Esprit ---
+        print(f"{worker_id} Lade Rohteil in Esprit. Pfad für typewrite: \"{rohteil_path_str_constructed}\"")
+        pyautogui.doubleClick(974, 1047, duration=0.4 * speed)
         time.sleep(0.5 * speed)
-        pyautogui.hotkey('ctrl', 'o');
+        pyautogui.hotkey('ctrl', 'o')
         time.sleep(0.5 * speed)
-        pyautogui.typewrite(rohteil_dxf_path);
+        pyautogui.typewrite(f'"{rohteil_path_str_constructed}"')  # In Anführungszeichen
         time.sleep(0.5 * speed)
-        pyautogui.press('enter');
-        time.sleep(1.0 * speed)  # Mehr Zeit zum Laden geben
-        # Schraubstock laden
-        pyautogui.doubleClick(977, 1142, duration=0.4 * speed);
+        pyautogui.press('enter')
+        time.sleep(1.0 * speed)
+        print(f"{worker_id} Rohteil-Laden an Esprit gesendet.")
+
+        # --- Schraubstock laden in Esprit ---
+        print(f"{worker_id} Lade Schraubstock in Esprit. Pfad für typewrite: \"{schraubstock_path_str_constructed}\"")
+        pyautogui.doubleClick(977, 1142, duration=0.4 * speed)
         time.sleep(0.5 * speed)
-        pyautogui.hotkey('ctrl', 'o');
-        time.sleep(0.8 * speed)
-        pyautogui.typewrite(schraubstock_step_path);
-        time.sleep(0.8 * speed)
-        pyautogui.press('enter');
-        time.sleep(1.0 * speed)  # Mehr Zeit zum Laden
+        pyautogui.hotkey('ctrl', 'o')
+        time.sleep(1.2 * speed)
+        pyautogui.typewrite(f'"{schraubstock_path_str_constructed}"')  # In Anführungszeichen
+        time.sleep(1.8 * speed)
+        pyautogui.press('enter')
+        time.sleep(1.0 * speed)
+
+        print(f"{worker_id} Schraubstock-Laden an Esprit gesendet.")
+        print(f"{worker_id} A7: Dateien sollten geladen sein.")
 
     def _perform_automation_sequence(self):
         """Führt die blockierenden PyAutoGUI-Aktionen aus."""
@@ -338,7 +381,9 @@ class KombiWorkflow:
 
             time.sleep(0.5)  # Kurze Pause bevor es losgeht
             self._action_1()
+            time.sleep(0.5)
             self._action_2()
+            time.sleep(0.5)
             self._action_3()
             self._action_4()
             self._action_5()
