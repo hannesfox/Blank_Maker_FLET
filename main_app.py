@@ -8,7 +8,6 @@ from core.event_handlers import EventHandlersBase # Angepasster Import
 class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
     """
     Die Hauptanwendungsklasse für den Blank Maker.
-    Sie kapselt die gesamte UI-Logik und die Anwendungsfunktionalität.
     """
 
     def __init__(self, page: ft.Page):
@@ -22,14 +21,13 @@ class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
         self.external_flet_process = None
 
         # --- Datumsabhängige Pfade dynamisch erstellen ---
-        self.base_path4 = config.BASE_PATH4 # Wird in ui.elements für destination_field verwendet
+        self.base_path4 = config.BASE_PATH4
 
         # --- UI-Erstellung (Widgets werden an self gebunden) ---
-        create_all_ui_elements(self) # Übergibt die aktuelle Instanz
+        create_all_ui_elements(self)
 
         # --- Event-Handler Initialisierung (ruft Methoden aus EventHandlersBase) ---
-        super().__init__() # Wichtig: Initialisiert die Basisklasse korrekt, falls sie einen eigenen __init__ hätte
-                           # In diesem Fall werden Methoden wie get_folder_options direkt aufgerufen.
+        super().__init__()
 
         # --- Ordneroptionen laden (nachdem UI-Elemente erstellt wurden) ---
         self.folder_options = self.get_folder_options() # Methode aus EventHandlersBase
@@ -41,15 +39,15 @@ class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
 
 
         # --- UI-Layout aufbauen ---
-        build_main_ui(self) # Übergibt die aktuelle Instanz
+        build_main_ui(self)
 
         # --- Asynchrone Aufgabe starten ---
-        self.page.run_task(self.continuously_check_dxf_files) # Methode aus EventHandlersBase
+        self.page.run_task(self.continuously_check_dxf_files)
 
 
 def main(page: ft.Page):
     # --- Fensterkonfiguration ---
-    page.title = "BMM 10.FLET by Gschwendtner Johannes" # Versionsnummer angepasst
+    page.title = "BMM 10.FLET by Gschwendtner Johannes"
     page.window.width = 680
     page.window.height = 1200
     page.window.resizable = True
@@ -85,7 +83,6 @@ def main(page: ft.Page):
 
     # --- App-Instanz erstellen und ausführen ---
     app = BlankMakerApp(page)
-    # Die Page wird durch das `app` Objekt bereits initialisiert und aufgebaut.
 
 if __name__ == '__main__':
     ft.app(target=main)
