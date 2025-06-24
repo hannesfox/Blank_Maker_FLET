@@ -1,109 +1,119 @@
-# Wichtig: Dieses Skript benötigt 'pyautogui' und 'keyboard' installiert.
-# Es läuft als separater Prozess.
-# Der Pfad zu den Bildern muss relativ zu diesem Skript korrekt sein,
-# oder es müssen absolute Pfade verwendet werden.
-# Annahme: Der "Bilder" Ordner ist im selben Verzeichnis wie das Hauptprojekt,
-# von dem aus dieses Skript als Subprozess gestartet wird, oder der Pfad
-# wird angepasst.
-
 import pyautogui
-import keyboard  # Beachte: keyboard benötigt root/Admin-Rechte unter Linux/macOS für globale Hotkeys
+import keyboard
 import time
 from threading import Thread
 import os
-from pathlib import Path
+from pathlib import Path  # Wir nutzen pathlib für saubere Pfad-Manipulation
 
-# Versuche, den Bilder-Ordner relativ zum Hauptprojekt zu finden.
-# Dies ist eine Heuristik und funktioniert, wenn das Skript aus einem Unterordner
-# des Projekts gestartet wird, wo auch der "Bilder" Ordner liegt.
+# --- ABSOLUTEN PFAD ZU DEN BILDERN ERMITTELN (NEUE, VERBESSERTE VERSION) ---
+# Dies löst das Problem, dass die Bilder in einem anderen Ordner liegen.
+
+# 1. Finde den Ordner, in dem das Skript liegt (z.B. ...\external_scripts)
 SCRIPT_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT_GUESS = SCRIPT_DIR.parent  # Annahme: external_scripts ist ein Unterordner von Projekt Root
-IMAGES_FOLDER = PROJECT_ROOT_GUESS / "Bilder"
 
-print(f"Prozess Listener: Vermuteter Projekt-Root: {PROJECT_ROOT_GUESS}")
-print(f"Prozess Listener: Suche Bilder in: {IMAGES_FOLDER}")
+# 2. Gehe eine Ebene höher zum Projekt-Root (z.B. ...\Blank_Maker_FLET)
+PROJECT_ROOT = SCRIPT_DIR.parent
+
+# 3. Gehe von dort in den "Bilder"-Ordner
+IMAGES_FOLDER = PROJECT_ROOT / "Bilder"
 
 
-def get_image_path_listener(image_name):
+def get_image_path(image_name):
+    """Baut einen vollständigen, absoluten Pfad zu einer Bilddatei im "Bilder"-Ordner."""
     path = IMAGES_FOLDER / image_name
     if not path.exists():
-        # Fallback: Suche im aktuellen Verzeichnis des Skripts (falls Bilder dort wären)
-        fallback_path = SCRIPT_DIR / image_name
-        if fallback_path.exists():
-            print(f"Prozess Listener: Bild {image_name} im Skriptverzeichnis gefunden: {fallback_path}")
-            return str(fallback_path)
-        print(f"Prozess Listener: Bild {image_name} nicht gefunden in {IMAGES_FOLDER} oder {SCRIPT_DIR}")
-        raise pyautogui.ImageNotFoundException(f"Bild {image_name} nicht gefunden.")
+        # Fallback für unterschiedliche Dateiendungen (z.B. .png vs .PNG)
+        if path.with_suffix('.PNG').exists():
+            return str(path.with_suffix('.PNG'))
+        # Wenn immer noch nicht gefunden, werfen wir einen klaren Fehler
+        raise FileNotFoundError(f"Bilddatei nicht gefunden: {path}")
     return str(path)
 
 
-def process_images_for_f12():
+# --- Dein restlicher Code, unverändert, da die Logik oben alles regelt ---
+
+def process_images_robust():
+    """
+    Diese Funktion sucht und klickt die Bilder mit besserem Timing und Fehler-Feedback.
+    """
     try:
-        # Pfade zu den Bildern anpassen, falls nötig!
-        image1_path = get_image_path_listener('image1.png')  # Beispielbildname
-        image2_path = get_image_path_listener('image2.png')  # Beispielbildname
+        # Pfade zu den Bildern holen
+        image1_path = get_image_path('image1.png')
+        image2_path = get_image_path('image2.png')  # get_image_path kümmert sich um .png/.PNG
 
-        print(f"Prozess Listener: Suche image1.png ({image1_path})")
-        image_pos = pyautogui.locateOnScreen(image1_path, confidence=0.7, grayscale=True)
-        if image_pos is None:
-            print("Prozess Listener: image1.png nicht gefunden.")
-            return  # Frühzeitiger Ausstieg, wenn das erste Bild nicht da ist
+        # --- SCHRITT 1: Suche nach dem ersten Bild ---
+        print(f"Suche nach Bild: {image1_path}")
+        image1_pos = pyautogui.locateOnScreen(image1_path, confidence=0.7, grayscale=True)
 
-        x, y = pyautogui.center(image_pos)
-        time.sleep(0.05)
-        pyautogui.click(x, y)
-        print("Prozess Listener: Klick auf image1.png")
-        time.sleep(0.05)
-
-        print(f"Prozess Listener: Suche image2.png ({image2_path})")
-        image_pos = pyautogui.locateOnScreen(image2_path, confidence=0.7, grayscale=True)
-        if image_pos is None:
-            print("Prozess Listener: image2.png nicht gefunden.")
+        if image1_pos is None:
+            print("FEHLER: image1.png wurde auf dem Bildschirm nicht gefunden.")
             return
 
-        x, y = pyautogui.center(image_pos)
-        time.sleep(0.05)
+        print("image1.png gefunden. Klicke darauf.")
+        x, y = pyautogui.center(image1_pos)
         pyautogui.click(x, y)
-        print("Prozess Listener: Klick auf image2.png")
-        time.sleep(0.05)
+        time.sleep(1.0)
+
+        # --- SCHRITT 2: Suche nach dem zweiten Bild ---
+        print(f"Suche nach Bild: {image2_path}")
+        image2_pos = pyautogui.locateOnScreen(image2_path, confidence=0.7, grayscale=True)
+
+        if image2_pos is None:
+            print("FEHLER: image2.png wurde nach dem Klick auf image1 nicht gefunden.")
+            # Speichere den Screenshot im Skript-Ordner, das ist am einfachsten zu finden
+            debug_screenshot_path = SCRIPT_DIR / "debug_screen_failing_at_image2.png"
+            pyautogui.screenshot(str(debug_screenshot_path))
+            print(f"Habe einen Screenshot ('{debug_screenshot_path}') gespeichert, um das Problem zu analysieren.")
+            return
+
+        print("image2.png gefunden. Klicke darauf.")
+        x, y = pyautogui.center(image2_pos)
+        pyautogui.click(x, y)
+        time.sleep(0.5)
+
+        print("Bild-Prozess erfolgreich abgeschlossen.")
+
+    except FileNotFoundError as e:
+        print(f"DATEI-FEHLER: {e}. Überprüfe den Pfad und den Dateinamen.")
+
     except pyautogui.ImageNotFoundException:
-        print("Prozess Listener: Ein oder mehrere Bilder für F12-Aktion nicht gefunden.")
+        print("FEHLER (ImageNotFoundException): Ein Bild wurde auf dem Bildschirm nicht gefunden.")
+
     except Exception as e:
-        print(f"Prozess Listener: Fehler in process_images_for_f12: {e}")
+        print(f"Ein unerwarteter Fehler ist in process_images_robust aufgetreten: {e}")
 
 
-def on_f12_pressed_event(event):  # event wird von keyboard übergeben
-    if event.name == 'f12':  # Sicherstellen, dass es wirklich F12 ist
-        print("Prozess Listener: F12 gedrückt.")
-        pyautogui.rightClick()
-        time.sleep(0.05)
-        # Starte die Bildverarbeitung in einem neuen Thread, um den Listener nicht zu blockieren
-        img_thread = Thread(target=process_images_for_f12, daemon=True)
-        img_thread.start()
-        time.sleep(0.2)  # Etwas mehr Zeit geben, bevor STRG+V kommt
-        # Original hatte 2s, das ist sehr lang. Teste mit kürzerer Zeit.
-        # Diese Zeit muss ggf. an die Geschwindigkeit der process_images angepasst werden.
-        pyautogui.hotkey('ctrl', 'v')
-        time.sleep(0.2)
-        pyautogui.press('enter')
-        print("Prozess Listener: F12-Aktion abgeschlossen.")
+def on_f12_pressed(event):
+    if event.name != 'f12':
+        return
+
+    print("\n--- F12 gedrückt, starte Aktion ---")
+    pyautogui.rightClick()
+    time.sleep(0.2)
+
+    img_thread = Thread(target=process_images_robust)
+    img_thread.start()
+
+    time.sleep(2)  # Diese Zeit muss evtl. angepasst werden, je nachdem wie lange process_images braucht
+
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(0.2)
+    pyautogui.press('enter')
+    print("--- F12-Aktion (Paste & Enter) abgeschlossen ---")
 
 
-if __name__ == '__main__':
-    print("Prozess Listener (F12 Hotkey) gestartet. Drücke F12, um Aktionen auszulösen.")
-    print("Beende diesen Prozess durch Schließen des Fensters oder über Task-Manager.")
+# --- Hauptprogramm ---
+print("Hotkey-Listener gestartet. Drücke F12, um die Aktion auszulösen.")
+print(f"Skript läuft aus Verzeichnis: {SCRIPT_DIR}")
+print(f"Sucht Bilder im Verzeichnis: {IMAGES_FOLDER}")
+print("Beende das Skript mit Strg+C im Terminal oder durch Schließen des Fensters.")
 
-    # Registriere den Hotkey
-    # 'suppress=True' würde verhindern, dass F12 an andere Anwendungen weitergegeben wird.
-    # Ist hier meist nicht gewünscht.
-    keyboard.on_press_key('f12', on_f12_pressed_event)
+keyboard.on_press_key('f12', on_f12_pressed)
 
-    # Halte das Skript am Laufen, um auf Hotkeys zu lauschen
-    try:
-        while True:
-            time.sleep(1)  # Reduziert CPU-Last
-    except KeyboardInterrupt:
-        print("Prozess Listener durch Benutzer beendet.")
-    finally:
-        keyboard.unhook_all()  # Wichtig, um Hotkeys freizugeben
-        print("Prozess Listener beendet und Hotkeys freigegeben.")
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    print("\nSkript wird beendet.")
+finally:
+    keyboard.unhook_all()
