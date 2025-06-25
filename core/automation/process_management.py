@@ -33,7 +33,7 @@ def run_script_async(
 ):
     """
     Startet ein Python-Skript als Subprozess und aktualisiert die UI.
-    Gibt die Prozessreferenz zurück oder None bei Fehler.
+    Start Stop Button für Prozess Öffnen funktion.
     """
     if current_process_ref and current_process_ref.poll() is None:
         # show_dialog_func("Info", f"{process_name} läuft bereits!") # Dialog sollte vom Haupt-Handler kommen
@@ -56,12 +56,17 @@ def run_script_async(
         new_process = subprocess.Popen(["python", script_path_str], creationflags=creationflags)
 
         start_button.disabled = True
-        if stop_button:  # <<< PRÜFE, OB DER STOP_BUTTON ÜBERGEBEN WURDE
+        if stop_button:
             stop_button.disabled = False
         if status_icon:
             status_icon.color = running_color
 
+        if status_text:
+            status_text.value = status_running_text
+            status_text.color = running_color
+
         page.update()
+
         if callable(on_stop_callback):
             page.run_task(monitor_process_async, new_process, on_stop_callback)
         return new_process
