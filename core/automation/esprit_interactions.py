@@ -158,8 +158,8 @@ def run_esprit_rohteil_definition_sequence(length, width, height, images_base_pa
 
 
 # --- Logik für B-Seite Automatisierung (ehemals bseite.py) ---
-VERWEILZEIT_BSEITE = 0.3  # Angepasste Verweilzeit
-PYAUTOGUI_DURATION = 0.2  # Standard Dauer für Mausbewegungen
+VERWEILZEIT_BSEITE = 0.25  # Angepasste Verweilzeit
+PYAUTOGUI_DURATION = 0.35  # Standard Dauer für Mausbewegungen
 
 
 def _get_bseite_image_path(image_name_with_ext: str, images_folder: Path) -> str:
@@ -303,16 +303,16 @@ def _perform_bseite_automation_steps(page_for_dialog: ft.Page, partheight_value:
         time.sleep(VERWEILZEIT_BSEITE)  # Freiklick
 
         # Suche b3.png oder b4.png
-        b3_found = _find_image_and_click_bseite('b3.png', images_folder_path, conf=0.7, action_desc="Symmetrieebene b3",
+        b3_found = _find_image_and_click_bseite('b4.png', images_folder_path, conf=0.7, action_desc="Symmetrieebene b3",
                                                 retries=5)
         if not b3_found:
-            b4_found = _find_image_and_click_bseite('b4.png', images_folder_path, conf=0.7,
+            b4_found = _find_image_and_click_bseite('b3.png', images_folder_path, conf=0.7,
                                                     action_desc="Symmetrieebene b4", retries=5)
             if not b4_found:
                 raise Exception("Bilder für Symmetrieebene (b3.png oder b4.png) nicht gefunden.")
         pyautogui.click(x=2153, y=816, duration=PYAUTOGUI_DURATION)  # Bestätigungspunkt
         time.sleep(VERWEILZEIT_BSEITE)
-        pyautogui.press('enter');
+        pyautogui.press('enter')
         time.sleep(VERWEILZEIT_BSEITE)
 
         # Konturzug auswählen
@@ -320,7 +320,7 @@ def _perform_bseite_automation_steps(page_for_dialog: ft.Page, partheight_value:
         time.sleep(VERWEILZEIT_BSEITE)  # Feature Manager
         pyautogui.click(x=1477, y=251, duration=PYAUTOGUI_DURATION);
         time.sleep(VERWEILZEIT_BSEITE)  # "Konturzug"
-        pyautogui.hotkey('ctrl', 'a');
+        pyautogui.hotkey('ctrl', 'a')
         time.sleep(VERWEILZEIT_BSEITE)
 
         # Bearbeitungsseite ändern
@@ -336,7 +336,7 @@ def _perform_bseite_automation_steps(page_for_dialog: ft.Page, partheight_value:
         # Alles auswählen (Werkzeugwege)
         pyautogui.click(x=1477, y=80, duration=PYAUTOGUI_DURATION);
         time.sleep(VERWEILZEIT_BSEITE)
-        pyautogui.click(x=1477, y=101, duration=PYAUTOGUI_DURATION);
+        pyautogui.click(x=1477, y=101, duration=PYAUTOGUI_DURATION)
         time.sleep(VERWEILZEIT_BSEITE)  # "Alle" (Werkzeugwege)
 
         # Neuberechnen
@@ -348,6 +348,9 @@ def _perform_bseite_automation_steps(page_for_dialog: ft.Page, partheight_value:
                                       "B-Seiten Automatisierung erfolgreich abgeschlossen.",
                                       bring_to_front_func=_bring_flet_to_front)
         print(f"[WorkerThread {current_thread_id}] B-Seiten Automation beendet.")
+
+        #ok Position flet app
+        pyautogui.moveTo(x=473, y=659, duration=PYAUTOGUI_DURATION)
 
     except pyautogui.FailSafeException:
         msg = "Maus in Ecke bewegt (Fail-Safe). B-Seiten Automatisierung abgebrochen."
