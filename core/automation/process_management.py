@@ -2,6 +2,7 @@ import flet as ft
 import subprocess
 import asyncio
 from pathlib import Path
+import sys
 
 
 async def monitor_process_async(process, on_stop_callback):
@@ -53,7 +54,7 @@ def run_script_async(
             if callable(on_stop_callback): on_stop_callback()  # UI zurücksetzen
             return None
 
-        new_process = subprocess.Popen(["python", script_path_str], creationflags=creationflags)
+        new_process = subprocess.Popen([sys.executable, script_path_str], creationflags=creationflags)
 
         start_button.disabled = True
         if stop_button:

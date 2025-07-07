@@ -1,0 +1,5 @@
+flet~=0.28.3
+PyAutoGUI~=0.9.54
+PyScreeze~=1.0.1
+ezdxf~=1.4.2
+keyboard~=0.13.5

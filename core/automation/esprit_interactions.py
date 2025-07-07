@@ -302,18 +302,54 @@ def _perform_bseite_automation_steps(page_for_dialog: ft.Page, partheight_value:
         pyautogui.click(x=1021, y=177, duration=PYAUTOGUI_DURATION);
         time.sleep(VERWEILZEIT_BSEITE)  # Freiklick
 
-        # Suche b3.png oder b4.png
-        b3_found = _find_image_and_click_bseite('b4.png', images_folder_path, conf=0.7, action_desc="Symmetrieebene b3",
-                                                retries=5)
-        if not b3_found:
-            b4_found = _find_image_and_click_bseite('b3.png', images_folder_path, conf=0.7,
-                                                    action_desc="Symmetrieebene b4", retries=5)
-            if not b4_found:
-                raise Exception("Bilder für Symmetrieebene (b3.png oder b4.png) nicht gefunden.")
-        pyautogui.click(x=2153, y=816, duration=PYAUTOGUI_DURATION)  # Bestätigungspunkt
+        # --- START: Robuste Version mit Fehlerbehandlung (try...except) ---
+
+        # 1. Konfiguration
+        b3_path = _get_bseite_image_path('b3.png', images_folder_path)
+        b4_path = _get_bseite_image_path('b4.png', images_folder_path)
+        versuche = 0
+
+        print("Starte robuste Suche: b4 (Doppelklick) oder b3 (Einzelklick)...")
+
+        # 2. Die Suchschleife mit Fehlerbehandlung
+        while True:
+            # Sicherheits-Check
+            if versuche > 10:
+                raise Exception("Timeout: Weder 'b3.png' noch 'b4.png' gefunden.")
+
+            # VERSUCH 1: Suche nach b4 (für Doppelklick)
+            try:
+                b4_location = pyautogui.locateOnScreen(b4_path, confidence=0.8)
+                if b4_location:
+                    print("b4.png gefunden -> Führe Doppelklick aus.")
+                    pyautogui.doubleClick(pyautogui.center(b4_location), duration=PYAUTOGUI_DURATION)
+                    break  # Erfolgreich, Schleife verlassen
+            except pyautogui.ImageNotFoundException:
+                # Das ist okay, bedeutet nur, b4 ist nicht da. Mache einfach weiter.
+                pass
+
+            # VERSUCH 2: Suche nach b3 (für Einzelklick)
+            try:
+                b3_location = pyautogui.locateOnScreen(b3_path, confidence=0.8)
+                if b3_location:
+                    print("b3.png gefunden -> Führe Einzelklick aus.")
+                    pyautogui.click(pyautogui.center(b3_location), duration=PYAUTOGUI_DURATION)
+                    break  # Erfolgreich, Schleife verlassen
+            except pyautogui.ImageNotFoundException:
+                # Das ist auch okay, bedeutet nur, b3 ist auch (noch) nicht da.
+                pass
+
+            # Wenn nach beiden Suchen nichts gefunden wurde: Warten und erneut versuchen
+            versuche += 1
+            time.sleep(1)
+
+        # 3. Aktionen nach erfolgreicher Suche
         time.sleep(VERWEILZEIT_BSEITE)
         pyautogui.press('enter')
         time.sleep(VERWEILZEIT_BSEITE)
+
+        # --- ENDE: Robuste Version mit Fehlerbehandlung (try...except) ---
+
 
         # Konturzug auswählen
         pyautogui.click(x=1477, y=82, duration=PYAUTOGUI_DURATION);

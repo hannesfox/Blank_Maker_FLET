@@ -3,6 +3,7 @@ import config
 from ui.elements import create_all_ui_elements
 from ui.layout import build_main_ui
 from core.event_handlers import EventHandlersBase # Angepasster Import
+import sys
 
 
 class BlankMakerApp(EventHandlersBase): # Erbt von EventHandlersBase
