@@ -134,7 +134,7 @@ def create_all_ui_elements(app_instance):
         **textfield_style
     )
 
-    # --- Dropdown-Menüs ---
+    # --- Dropdown-Menüs ---    A: 650V B:100EVO
     app_instance.folder_dropdown = ft.Dropdown(
         label="Spannmittel Ordner",
         width=300,
@@ -150,7 +150,8 @@ def create_all_ui_elements(app_instance):
             ft.dropdown.Option('5 Achs  5 Achs'),
             ft.dropdown.Option('3 Achs  3 Achs'),
             ft.dropdown.Option('5 Achs'),
-            ft.dropdown.Option('3 Achs')
+            ft.dropdown.Option('3 Achs'),
+            ft.dropdown.Option('A: 650V B:100EVO')
         ],
         on_change=app_instance.update_folder_selection,
         **dropdown_style
